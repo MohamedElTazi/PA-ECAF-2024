@@ -1,4 +1,4 @@
-package com.ecaf.ecafclientjava.technique;
+package com.ecaf.ecafclientjava.entites;
 
 import java.util.Date;
 

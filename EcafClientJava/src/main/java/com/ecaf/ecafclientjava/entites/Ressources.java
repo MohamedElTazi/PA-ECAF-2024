@@ -1,4 +1,4 @@
-package com.ecaf.ecafclientjava.technique;
+package com.ecaf.ecafclientjava.entites;
 
 public class Ressources {
     public Integer ressourceId;
