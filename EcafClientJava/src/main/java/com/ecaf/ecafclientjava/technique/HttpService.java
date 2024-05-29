@@ -1,5 +1,6 @@
 package com.ecaf.ecafclientjava.technique;
 
+import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -15,96 +16,22 @@ public class HttpService {
 
     private final HttpClient client;
 
-    public HttpService(Consumer<HttpResponseWrapper> callback) {
+    public HttpService() {
         this.client = HttpClient.newHttpClient();
     }
 
-    public void sendAsyncPostRequest(String url, String requestBody, Consumer<HttpResponseWrapper> callback) {
+    public HttpResponseWrapper sendPostRequest(String requestBody) throws IOException, InterruptedException {
         HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(Urlapi.BASE_URL.getUrl()+url))
+                .uri(URI.create(Urlapi.BASE_URL.getUrl() + "auth/login"))
                 .header("Content-Type", "application/json")
                 .POST(HttpRequest.BodyPublishers.ofString(requestBody))
                 .build();
 
-        CompletableFuture<HttpResponse<String>> response = client.sendAsync(request, HttpResponse.BodyHandlers.ofString());
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+        int statusCode = response.statusCode();
+        JsonNode jsonNode = parseJson(response.body());
 
-        response.thenApply(httpResponse -> {
-                    int statusCode = httpResponse.statusCode();
-                    JsonNode jsonNode = parseJson(httpResponse.body());
-                    return new HttpResponseWrapper(jsonNode, statusCode);
-                })
-                .thenAccept(callback)
-                .exceptionally(e -> {
-                    e.printStackTrace();
-                    Platform.runLater(() -> callback.accept(new HttpResponseWrapper(null, 500)));
-                    return null;
-                });
-    }
-
-    public void sendAsyncGetRequest(String url, Consumer<HttpResponseWrapper> callback) {
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(Urlapi.BASE_URL.getUrl() + url))
-                .header("Content-Type", "application/json")
-                .GET()
-                .build();
-
-        CompletableFuture<HttpResponse<String>> response = client.sendAsync(request, HttpResponse.BodyHandlers.ofString());
-
-        response.thenApply(httpResponse -> {
-                    int statusCode = httpResponse.statusCode();
-                    JsonNode jsonNode = parseJson(httpResponse.body());
-                    return new HttpResponseWrapper(jsonNode, statusCode);
-                })
-                .thenAccept(callback)
-                .exceptionally(e -> {
-                    e.printStackTrace();
-                    Platform.runLater(() -> callback.accept(new HttpResponseWrapper(null, 500)));
-                    return null;
-                });
-    }
-
-    public void sendAsyncPatchRequest(String url, String requestBody, Consumer<HttpResponseWrapper> callback) {
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(Urlapi.BASE_URL.getUrl() + url))
-                .header("Content-Type", "application/json")
-                .method("PATCH", HttpRequest.BodyPublishers.ofString(requestBody))
-                .build();
-
-        CompletableFuture<HttpResponse<String>> response = client.sendAsync(request, HttpResponse.BodyHandlers.ofString());
-
-        response.thenApply(httpResponse -> {
-                    int statusCode = httpResponse.statusCode();
-                    JsonNode jsonNode = parseJson(httpResponse.body());
-                    return new HttpResponseWrapper(jsonNode, statusCode);
-                })
-                .thenAccept(callback)
-                .exceptionally(e -> {
-                    e.printStackTrace();
-                    Platform.runLater(() -> callback.accept(new HttpResponseWrapper(null, 500)));
-                    return null;
-                });
-    }
-
-    public void sendAsyncDeleteRequest(String url, Consumer<HttpResponseWrapper> callback) {
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(Urlapi.BASE_URL.getUrl() + url))
-                .header("Content-Type", "application/json")
-                .DELETE()
-                .build();
-
-        CompletableFuture<HttpResponse<String>> response = client.sendAsync(request, HttpResponse.BodyHandlers.ofString());
-
-        response.thenApply(httpResponse -> {
-                    int statusCode = httpResponse.statusCode();
-                    JsonNode jsonNode = parseJson(httpResponse.body());
-                    return new HttpResponseWrapper(jsonNode, statusCode);
-                })
-                .thenAccept(callback)
-                .exceptionally(e -> {
-                    e.printStackTrace();
-                    Platform.runLater(() -> callback.accept(new HttpResponseWrapper(null, 500)));
-                    return null;
-                });
+        return new HttpResponseWrapper(jsonNode, statusCode);
     }
 
     private JsonNode parseJson(String responseBody) {
@@ -117,3 +44,4 @@ public class HttpService {
         }
     }
 }
+

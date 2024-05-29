@@ -13,6 +13,7 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.input.KeyCombination;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
@@ -27,7 +28,7 @@ public class Main extends Application {
     private final MenuItem itemDeconnecter = new MenuItem("Se deconnecter");
     private JsonNode jsonResponse; // Variable pour stocker la réponse JSON
     private int statusCode; // Variable pour stocker le code de statut
-    private final HttpService httpService = new HttpService(this::handleResponse);
+    private final HttpService httpService = new HttpService();
     @Override
     public void start(Stage stage) throws IOException {
 
@@ -37,16 +38,44 @@ public class Main extends Application {
 
         MenuBar barreMenus = new MenuBar();
 
-        Menu menuFichier = new Menu("Fichier");
-
-
         MenuItem itemQuitter = new MenuItem("Quitter");
+        itemQuitter.setAccelerator(KeyCombination.keyCombination("Ctrl+X"));
+
+        //////////////////////// Menu Fichier ///////////////////////////
+
+
+        Menu menuFichier = new Menu("Fichier");
 
         menuFichier.getItems().add(itemConnecter);
         menuFichier.getItems().add(itemDeconnecter);
         menuFichier.getItems().add(itemQuitter);
 
         barreMenus.getMenus().add(menuFichier);
+
+
+        //////////////////////// Menu Ressource ///////////////////////////
+
+        MenuItem itemGestionRessources = new MenuItem("Gestion des ressources");
+
+        Menu menuRessource = new Menu("Ressource");
+
+        menuRessource.getItems().add(itemGestionRessources);
+
+        barreMenus.getMenus().add(menuRessource);
+
+        //////////////////////// Menu Tache ///////////////////////////
+
+        MenuItem itemGestionTaches = new MenuItem("Gestion des taches");
+        MenuItem itemPlanificationTaches = new MenuItem("Planification des taches");
+
+        Menu menuTache= new Menu("Tache");
+
+        menuTache.getItems().add(itemGestionTaches);
+        menuTache.getItems().add(itemPlanificationTaches);
+
+        barreMenus.getMenus().add(menuTache);
+
+
 
         root.setTop(barreMenus);
 
@@ -67,11 +96,25 @@ public class Main extends Application {
                     try {
                         String username = reponse.get().getKey();
                         String password = reponse.get().getValue();
-                        String requestBody =
-                                "{\"email\":\"" + username +
-                                "\", \"motDePasse\":\"" + password + "\"}";
+                        String requestBody = "{\"email\":\"" + username + "\", \"motDePasse\":\"" + password + "\"}";
 
-                        httpService.sendAsyncPostRequest("auth/login",requestBody, Main.this::handleResponse);
+                        // Appel synchrone
+                        HttpResponseWrapper responseWrapper = httpService.sendPostRequest(requestBody);
+                        jsonResponse = responseWrapper.getBody();
+                        statusCode = responseWrapper.getStatusCode();
+
+                        System.out.println("Response Code: " + statusCode);
+                        System.out.println("Response Body: " + jsonResponse);
+
+                        if (statusCode == 200) {
+                            itemConnecter.setDisable(true);
+                            itemDeconnecter.setDisable(false);
+                        } else {
+
+                            VueConnexionEchoue vueEchoue = new VueConnexionEchoue();
+                            vueEchoue.showAndWait();
+
+                        }
 
                     } catch (Exception e) {
                         e.printStackTrace();
@@ -86,6 +129,21 @@ public class Main extends Application {
 
             }
 
+        });
+
+        itemDeconnecter.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+
+                try {
+                    //httpService.sendAsyncDeleteRequest("auth/logout/2", Main.this::handleResponse);
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                itemConnecter.setDisable(false);
+                itemDeconnecter.setDisable(true);
+            }
         });
 
 
@@ -113,26 +171,7 @@ public class Main extends Application {
 
 
     }
-    private void handleResponse(HttpResponseWrapper responseWrapper) {
-        if (responseWrapper != null) {
-            this.jsonResponse = responseWrapper.getBody();
-            this.statusCode = responseWrapper.getStatusCode();
 
-
-            Platform.runLater(() -> {
-                if (this.statusCode == 200) {
-                    itemConnecter.setDisable(true);
-                    itemDeconnecter.setDisable(false);
-                } else {
-                    VueConnexionEchoue vueEchoue = new VueConnexionEchoue();
-                    vueEchoue.showAndWait();
-                }
-            });
-        } else {
-            System.out.println("An error occurred, no response received.");
-        }
-        System.out.println(getJsonResponse() + " " + getStatusCode());
-    }
 
     public JsonNode getJsonResponse() {
         return jsonResponse;
