@@ -1,11 +1,12 @@
 package com.ecaf.ecafclientjava;
 
+import com.ecaf.ecafclientjava.technique.HttpResponseWrapper;
 import com.ecaf.ecafclientjava.technique.HttpService;
 import com.ecaf.ecafclientjava.vue.VueConnexion;
 
+import com.ecaf.ecafclientjava.vue.VueConnexionEchoue;
 import com.ecaf.ecafclientjava.vue.VueConnexionVide;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
@@ -18,17 +19,15 @@ import javafx.stage.Stage;
 import javafx.util.Pair;
 
 import java.io.IOException;
-import java.net.http.HttpResponse;
 import java.util.Optional;
-import java.util.concurrent.TimeUnit;
 
 public class Main extends Application {
-    private Label responseLabel = new Label("Waiting for response...");
-    private MenuItem itemConnecter = new MenuItem("Connect");
 
-    public JsonNode jsonResponse; // Variable pour stocker la réponse JSON
-
-    private HttpService httpService = new HttpService(this::handleResponse);
+    private final MenuItem itemConnecter = new MenuItem("Se connecter");
+    private final MenuItem itemDeconnecter = new MenuItem("Se deconnecter");
+    private JsonNode jsonResponse; // Variable pour stocker la réponse JSON
+    private int statusCode; // Variable pour stocker le code de statut
+    private final HttpService httpService = new HttpService(this::handleResponse);
     @Override
     public void start(Stage stage) throws IOException {
 
@@ -40,8 +39,7 @@ public class Main extends Application {
 
         Menu menuFichier = new Menu("Fichier");
 
-        MenuItem itemConnecter = new MenuItem("Se connecter");
-        MenuItem itemDeconnecter = new MenuItem("Se deconnecter");
+
         MenuItem itemQuitter = new MenuItem("Quitter");
 
         menuFichier.getItems().add(itemConnecter);
@@ -52,7 +50,7 @@ public class Main extends Application {
 
         root.setTop(barreMenus);
 
-        Scene scene = new Scene(root, 320, 240);
+        Scene scene = new Scene(root, 1080, 720);
         stage.setTitle("Hello!");
         stage.setScene(scene);
         stage.show();
@@ -69,23 +67,28 @@ public class Main extends Application {
                     try {
                         String username = reponse.get().getKey();
                         String password = reponse.get().getValue();
-                        String requestBody = "{\"email\":\"" + username + "\", \"motDePasse\":\"" + password + "\"}";
+                        String requestBody =
+                                "{\"email\":\"" + username +
+                                "\", \"motDePasse\":\"" + password + "\"}";
 
-                        httpService.sendAsyncPostRequest(requestBody, Main.this::handleResponse);
-                        JsonNode jsonNode = getJsonResponse();
-                        TimeUnit.SECONDS.sleep(3);
-
-                        System.out.println("OKKKKKKK "+jsonNode);
+                        httpService.sendAsyncPostRequest("auth/login",requestBody, Main.this::handleResponse);
 
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
+
                 } else {
                     VueConnexionVide vueVide = new VueConnexionVide();
                     vueVide.showAndWait();
                 }
+
+
+
             }
+
         });
+
+
 
         itemQuitter.setOnAction(new EventHandler<ActionEvent>() {
             @Override
@@ -107,17 +110,34 @@ public class Main extends Application {
                 }
             }
         });
-    }
 
-    private void handleResponse(JsonNode response) {
-        System.out.println(response);
-        this.jsonResponse = response;
+
+    }
+    private void handleResponse(HttpResponseWrapper responseWrapper) {
+        if (responseWrapper != null) {
+            this.jsonResponse = responseWrapper.getBody();
+            this.statusCode = responseWrapper.getStatusCode();
+
+
+            Platform.runLater(() -> {
+                if (this.statusCode == 200) {
+                    itemConnecter.setDisable(true);
+                    itemDeconnecter.setDisable(false);
+                } else {
+                    VueConnexionEchoue vueEchoue = new VueConnexionEchoue();
+                    vueEchoue.showAndWait();
+                }
+            });
+        } else {
+            System.out.println("An error occurred, no response received.");
+        }
+        System.out.println(getJsonResponse() + " " + getStatusCode());
     }
 
     public JsonNode getJsonResponse() {
-        return this.jsonResponse; // Méthode pour récupérer la réponse JSON
+        return jsonResponse;
     }
-
+    public int getStatusCode() {return statusCode;}
 
 
     public static void main(String[] args) {
