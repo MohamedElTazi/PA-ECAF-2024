@@ -99,7 +99,7 @@ public class Main extends Application {
                         String requestBody = "{\"email\":\"" + username + "\", \"motDePasse\":\"" + password + "\"}";
 
                         // Appel synchrone
-                        HttpResponseWrapper responseWrapper = httpService.sendPostRequest(requestBody);
+                        HttpResponseWrapper responseWrapper = httpService.sendPostRequest("auth/login",requestBody);
                         jsonResponse = responseWrapper.getBody();
                         statusCode = responseWrapper.getStatusCode();
 
@@ -109,6 +109,7 @@ public class Main extends Application {
                         if (statusCode == 200) {
                             itemConnecter.setDisable(true);
                             itemDeconnecter.setDisable(false);
+                            root.setCenter(new Text("Bienvenue " + jsonResponse.get("token").asText()));
                         } else {
 
                             VueConnexionEchoue vueEchoue = new VueConnexionEchoue();
@@ -136,8 +137,12 @@ public class Main extends Application {
             public void handle(ActionEvent event) {
 
                 try {
-                    //httpService.sendAsyncDeleteRequest("auth/logout/2", Main.this::handleResponse);
-
+                    HttpResponseWrapper responseWrapper = httpService.sendDeleteRequest("auth/logout/2");
+                    jsonResponse = responseWrapper.getBody();
+                    statusCode = responseWrapper.getStatusCode();
+                    System.out.println("Response Code: " + statusCode);
+                    System.out.println("Response Body: " + jsonResponse);
+                    root.setCenter(new Text("Vous êtes déconnecté"));
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
