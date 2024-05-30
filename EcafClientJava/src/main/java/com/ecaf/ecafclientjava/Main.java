@@ -178,9 +178,7 @@ public class Main extends Application {
     }
 
 
-    public JsonNode getJsonResponse() {
-        return jsonResponse;
-    }
+    public JsonNode getJsonResponse() {return jsonResponse;}
     public int getStatusCode() {return statusCode;}
 
 

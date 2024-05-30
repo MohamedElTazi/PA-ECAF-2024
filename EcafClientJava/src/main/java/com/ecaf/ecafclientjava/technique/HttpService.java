@@ -18,9 +18,9 @@ public class HttpService {
         this.client = HttpClient.newHttpClient();
     }
 
-    public HttpResponseWrapper sendPostRequest(String pathUrl,String requestBody) throws IOException, InterruptedException {
+    public HttpResponseWrapper sendPostRequest(String endpoint,String requestBody) throws IOException, InterruptedException {
         HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(Urlapi.BASE_URL.getUrl() + pathUrl))
+                .uri(URI.create(Urlapi.BASE_URL.getUrl() + endpoint))
                 .header("Content-Type", "application/json")
                 .POST(HttpRequest.BodyPublishers.ofString(requestBody))
                 .build();

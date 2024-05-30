@@ -5,7 +5,7 @@ import javafx.scene.layout.VBox;
 import javafx.util.Callback;
 import javafx.util.Pair;
 
-public class VueConnexion extends Dialog<Pair<String,String>> {
+    public class VueConnexion extends Dialog<Pair<String,String>> {
 
     public String auth ="Authentification";
     public String saisie ="Saisir vos données de connexion";
@@ -44,8 +44,6 @@ public class VueConnexion extends Dialog<Pair<String,String>> {
                             ;
                         }
                         return null;
-
-
                     }
                 }
         );
