@@ -1,33 +1,53 @@
 package com.ecaf.ecafclientjava;
 
+import com.ecaf.ecafclientjava.entites.User;
 import com.ecaf.ecafclientjava.technique.HttpResponseWrapper;
 import com.ecaf.ecafclientjava.technique.HttpService;
+import com.ecaf.ecafclientjava.technique.Session;
 import com.ecaf.ecafclientjava.vue.VueConnexion;
 
 import com.ecaf.ecafclientjava.vue.VueConnexionEchoue;
 import com.ecaf.ecafclientjava.vue.VueConnexionVide;
+import com.ecaf.ecafclientjava.vue.VueFormTache;
 import com.fasterxml.jackson.databind.JsonNode;
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.KeyCombination;
+import javafx.scene.input.MouseButton;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
+import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import javafx.util.Pair;
 
 import java.io.IOException;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.Year;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 public class Main extends Application {
 
+
     private final MenuItem itemConnecter = new MenuItem("Se connecter");
     private final MenuItem itemDeconnecter = new MenuItem("Se deconnecter");
-    private JsonNode jsonResponse; // Variable pour stocker la réponse JSON
-    private int statusCode; // Variable pour stocker le code de statut
+    private JsonNode jsonResponse;
+    private int statusCode;
     private final HttpService httpService = new HttpService();
     @Override
     public void start(Stage stage) throws IOException {
@@ -57,7 +77,9 @@ public class Main extends Application {
 
         MenuItem itemGestionRessources = new MenuItem("Gestion des ressources");
 
+
         Menu menuRessource = new Menu("Ressource");
+
 
         menuRessource.getItems().add(itemGestionRessources);
 
@@ -85,6 +107,8 @@ public class Main extends Application {
         stage.show();
 
         itemDeconnecter.setDisable(true);
+        menuRessource.setDisable(true);
+        menuTache.setDisable(true);
 
         itemConnecter.setOnAction(new EventHandler<ActionEvent>() {
             @Override
@@ -97,19 +121,25 @@ public class Main extends Application {
                         String username = reponse.get().getKey();
                         String password = reponse.get().getValue();
                         String requestBody = "{\"email\":\"" + username + "\", \"motDePasse\":\"" + password + "\"}";
+                        //User admin = new User();
 
-                        // Appel synchrone
+
                         HttpResponseWrapper responseWrapper = httpService.sendPostRequest("auth/login",requestBody);
                         jsonResponse = responseWrapper.getBody();
                         statusCode = responseWrapper.getStatusCode();
 
-                        System.out.println("Response Code: " + statusCode);
-                        System.out.println("Response Body: " + jsonResponse);
 
                         if (statusCode == 200) {
+                            JsonNode userNode = jsonResponse.get("user");
+                            User admin = new User(Integer.parseInt(userNode.get("id").asText()), userNode.get("nom").asText(), userNode.get("prenom").asText(), userNode.get("email").asText(), userNode.get("motDePasse").asText(), userNode.get("role").asText(), Instant.parse(userNode.get("dateInscription").asText()) , userNode.get("estBenevole").asBoolean(), jsonResponse.get("token").asText());
+
+                            Session.ouvrir(admin);
+                            System.out.println(Session.getSession().getLeVisiteur());
                             itemConnecter.setDisable(true);
                             itemDeconnecter.setDisable(false);
-                            root.setCenter(new Text("Bienvenue " + jsonResponse.get("token").asText()));
+                            menuRessource.setDisable(false);
+                            menuTache.setDisable(false);
+                            root.setCenter(new Text("Bienvenue " + admin.getNom()));
                         } else {
 
                             VueConnexionEchoue vueEchoue = new VueConnexionEchoue();
@@ -140,8 +170,8 @@ public class Main extends Application {
                     HttpResponseWrapper responseWrapper = httpService.sendDeleteRequest("auth/logout/2");
                     jsonResponse = responseWrapper.getBody();
                     statusCode = responseWrapper.getStatusCode();
-                    System.out.println("Response Code: " + statusCode);
-                    System.out.println("Response Body: " + jsonResponse);
+
+                    Session.fermer();
                     root.setCenter(new Text("Vous êtes déconnecté"));
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -174,12 +204,19 @@ public class Main extends Application {
             }
         });
 
+        itemPlanificationTaches.setOnAction(
+                new EventHandler<ActionEvent>() {
+                    @Override
+                    public void handle(ActionEvent event) {
+                        VueFormTache tacheForm = new VueFormTache();
 
+                        root.setCenter(tacheForm);
+                    }
+                }
+        );
     }
 
 
-    public JsonNode getJsonResponse() {return jsonResponse;}
-    public int getStatusCode() {return statusCode;}
 
 
     public static void main(String[] args) {

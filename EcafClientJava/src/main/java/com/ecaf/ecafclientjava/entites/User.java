@@ -1,27 +1,32 @@
 package com.ecaf.ecafclientjava.entites;
 
 
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
 
 
 public class User {
-    private int userID;
+    private int id;
     private String nom;
     private String prenom;
     private String email;
     private String motDePasse;
     private String role;
     private boolean estBenevole;
-    private LocalDate dateInscription;
+    private Instant dateInscription;
+
+    private String token;
 
     // Associations
     private List<Reservation> reservations;
     private List<Tache> tachesResponsable;
 
+
+
     // Constructeur
-    public User(int userID, String nom, String prenom, String email, String motDePasse, String role, boolean estBenevole, LocalDate dateInscription) {
-        this.userID = userID;
+    public User(int userID, String nom, String prenom, String email, String motDePasse, String role,  Instant dateInscription ,boolean estBenevole, String token) {
+        this.id = userID;
         this.nom = nom;
         this.prenom = prenom;
         this.email = email;
@@ -29,15 +34,16 @@ public class User {
         this.role = role;
         this.estBenevole = estBenevole;
         this.dateInscription = dateInscription;
+        this.token = token;
     }
 
     // Getters et setters
     public int getUserID() {
-        return userID;
+        return id;
     }
 
     public void setUserID(int userID) {
-        this.userID = userID;
+        this.id = userID;
     }
 
     public String getNom() {
@@ -88,11 +94,11 @@ public class User {
         this.estBenevole = estBenevole;
     }
 
-    public LocalDate getDateInscription() {
+    public Instant getDateInscription() {
         return dateInscription;
     }
 
-    public void setDateInscription(LocalDate dateInscription) {
+    public void setDateInscription(Instant dateInscription) {
         this.dateInscription = dateInscription;
     }
 
@@ -112,5 +118,28 @@ public class User {
         this.tachesResponsable = tachesResponsable;
     }
 
+    public String getToken() {
+        return token;
+    }
 
+    public void setToken(String token) {
+        this.token = token;
+    }
+
+    @Override
+    public String toString() {
+        return "User{" +
+                "userID=" + id +
+                ", nom='" + nom + '\'' +
+                ", prenom='" + prenom + '\'' +
+                ", email='" + email + '\'' +
+                ", motDePasse='" + motDePasse + '\'' +
+                ", role='" + role + '\'' +
+                ", estBenevole=" + estBenevole +
+                ", dateInscription=" + dateInscription +
+                ", token='" + token + '\'' +
+                ", reservations=" + reservations +
+                ", tachesResponsable=" + tachesResponsable +
+                '}';
+    }
 }
