@@ -10,12 +10,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 
+import com.ecaf.ecafclientjava.entites.Tache;
 import com.ecaf.ecafclientjava.entites.User;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
 
 public class HttpService {
 
@@ -90,15 +92,26 @@ public class HttpService {
                     .registerTypeAdapter(Instant.class, new InstantTypeAdapter())
                     .create();
             String responseBody = responseWrapper.getBody().toString(); // Convert JsonNode to String
-            if (responseBody != null) {
-                UserResponse userResponse = gson.fromJson(responseBody, UserResponse.class);
-                if (userResponse != null && userResponse.getUsers() != null) {
-                    users = userResponse.getUsers();
-                    System.out.println("Users list: " + users);
-                }
-            }
+            UserResponse userResponse = gson.fromJson(responseBody, UserResponse.class);
+            users = userResponse.getUsers();
         }
         return users;
+    }
+
+    public List<Tache> getAllTaches() throws IOException, InterruptedException {
+        String endpoint = "taches"; // L'URL de votre endpoint pour récupérer les tâches
+        HttpResponseWrapper responseWrapper = sendGetRequest(endpoint);
+        List<Tache> taches = null;
+        if (responseWrapper.getStatusCode() == 200) {
+            Gson gson = new GsonBuilder()
+                    .registerTypeAdapter(Instant.class, new InstantTypeAdapter())
+                    .create();
+            String responseBody = responseWrapper.getBody().toString(); // Convert JsonNode to String
+            TacheResponse tacheResponse = gson.fromJson(responseBody, TacheResponse.class);
+            taches = tacheResponse.getTaches();
+;
+        }
+        return taches;
     }
 
     private JsonNode parseJson(String responseBody) {

@@ -4,41 +4,23 @@ import com.ecaf.ecafclientjava.entites.User;
 import com.ecaf.ecafclientjava.technique.HttpResponseWrapper;
 import com.ecaf.ecafclientjava.technique.HttpService;
 import com.ecaf.ecafclientjava.technique.Session;
-import com.ecaf.ecafclientjava.vue.VueConnexion;
+import com.ecaf.ecafclientjava.vue.*;
 
-import com.ecaf.ecafclientjava.vue.VueConnexionEchoue;
-import com.ecaf.ecafclientjava.vue.VueConnexionVide;
-import com.ecaf.ecafclientjava.vue.VueFormTache;
 import com.fasterxml.jackson.databind.JsonNode;
 import javafx.application.Application;
 import javafx.application.Platform;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
-import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.KeyCombination;
-import javafx.scene.input.MouseButton;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Pane;
-import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import javafx.util.Pair;
 
 import java.io.IOException;
 import java.time.Instant;
-import java.time.LocalDate;
-import java.time.Year;
-import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 
 public class Main extends Application {
@@ -209,15 +191,24 @@ public class Main extends Application {
                 new EventHandler<ActionEvent>() {
                     @Override
                     public void handle(ActionEvent event) {
-                        VueFormTache tacheForm = new VueFormTache();
+                        VuePlanificationTache planificationTache = new VuePlanificationTache();
 
-                        root.setCenter(tacheForm);
+                        root.setCenter(planificationTache);
+                    }
+                }
+        );
+
+        itemGestionTaches.setOnAction(
+                new EventHandler<ActionEvent>() {
+                    @Override
+                    public void handle(ActionEvent event) {
+                        VueGestionTache gestionTache = new VueGestionTache();
+
+                        root.setCenter(gestionTache);
                     }
                 }
         );
     }
-
-
 
 
     public static void main(String[] args) {

@@ -18,7 +18,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import javafx.scene.layout.*;
 
-public class VueFormTache extends Pane {
+public class VuePlanificationTache extends Pane {
 
     private TextField descriptionField = new TextField();
     private DatePicker dateDebutPicker = new DatePicker();
@@ -31,7 +31,7 @@ public class VueFormTache extends Pane {
     private TableView<User> adminTableView = new TableView<>();
     private TableView<User> adherentTableView = new TableView<>();
 
-    public VueFormTache() {
+    public VuePlanificationTache() {
         // GridPane for form
         GridPane grid = new GridPane();
         grid.setPadding(new Insets(20, 20, 20, 20));
