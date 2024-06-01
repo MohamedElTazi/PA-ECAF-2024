@@ -12,6 +12,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.scene.control.*;
+import javafx.scene.control.cell.ComboBoxTableCell;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.layout.BorderPane;
@@ -19,11 +20,14 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import javafx.util.Callback;
+import javafx.util.StringConverter;
 import javafx.util.converter.LocalDateStringConverter;
 
 import java.io.IOException;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 public class VueGestionTache extends BorderPane {
@@ -43,13 +47,12 @@ public class VueGestionTache extends BorderPane {
 
         // Fetch and populate data
         fetchAndPopulateTacheData();
-
         fetchAndPopulateUserData();
 
         // Set the layout
         VBox vbox = new VBox(10);
         vbox.setPadding(new Insets(20, 20, 20, 20));
-        vbox.getChildren().addAll(tacheTableView,adherentTableView,adminTableView);
+        vbox.getChildren().addAll(tacheTableView, adherentTableView, adminTableView);
 
         // Add to the BorderPane
         setCenter(vbox);
@@ -86,34 +89,48 @@ public class VueGestionTache extends BorderPane {
         descriptionColumn.setOnEditCommit(event -> {
             Tache tache = event.getRowValue();
             tache.setDescription(event.getNewValue());
-            // Optionally, update the task in the backend here
+            handleEditTache(tache);
         });
 
         TableColumn<Tache, Instant> dateDebutColumn = new TableColumn<>("Date Debut");
         dateDebutColumn.setCellValueFactory(new PropertyValueFactory<>("dateDebut"));
-        dateDebutColumn.setCellFactory(TextFieldTableCell.forTableColumn(new InstantStringConverter()));
+        dateDebutColumn.setCellFactory(param -> new DatePickerCell(true));
         dateDebutColumn.setOnEditCommit(event -> {
             Tache tache = event.getRowValue();
             tache.setDateDebut(event.getNewValue());
-            // Optionally, update the task in the backend here
+            handleEditTache(tache);
         });
 
         TableColumn<Tache, Instant> dateFinColumn = new TableColumn<>("Date Fin");
         dateFinColumn.setCellValueFactory(new PropertyValueFactory<>("dateFin"));
-        dateFinColumn.setCellFactory(TextFieldTableCell.forTableColumn(new InstantStringConverter()));
+        dateFinColumn.setCellFactory(param -> new DatePickerCell(false));
         dateFinColumn.setOnEditCommit(event -> {
             Tache tache = event.getRowValue();
             tache.setDateFin(event.getNewValue());
-            // Optionally, update the task in the backend here
+            handleEditTache(tache);
         });
 
         TableColumn<Tache, String> statutColumn = new TableColumn<>("Statut");
         statutColumn.setCellValueFactory(new PropertyValueFactory<>("statut"));
-        statutColumn.setCellFactory(TextFieldTableCell.forTableColumn());
+        statutColumn.setCellFactory(ComboBoxTableCell.forTableColumn("En cours", "Fini"));
         statutColumn.setOnEditCommit(event -> {
             Tache tache = event.getRowValue();
             tache.setStatut(event.getNewValue());
-            // Optionally, update the task in the backend here
+            handleEditTache(tache);
+        });
+
+        TableColumn<Tache, String> idResponsableColumn = new TableColumn<>("ID Responsable");
+        idResponsableColumn.setCellValueFactory(cellData -> {
+            User responsable = cellData.getValue().getResponsable();
+            return new SimpleStringProperty(responsable != null ? String.valueOf(responsable.getId()) : "N/A");
+        });
+        idResponsableColumn.setCellFactory(TextFieldTableCell.forTableColumn());
+        idResponsableColumn.setOnEditCommit(event -> {
+            Tache tache = event.getRowValue();
+            User responsable = new User();
+            responsable.setId(Integer.parseInt(event.getNewValue()));
+            tache.setResponsable(responsable);
+            handleEditTache(tache);
         });
 
         TableColumn<Tache, String> responsableColumn = new TableColumn<>("Responsable");
@@ -125,7 +142,7 @@ public class VueGestionTache extends BorderPane {
         TableColumn<Tache, Void> actionColumn = new TableColumn<>("Action");
         actionColumn.setCellFactory(createButtonCellFactory());
 
-        tacheTableView.getColumns().addAll(idColumn, descriptionColumn, dateDebutColumn, dateFinColumn, statutColumn, responsableColumn, actionColumn);
+        tacheTableView.getColumns().addAll(idColumn, descriptionColumn, dateDebutColumn, dateFinColumn, statutColumn, idResponsableColumn, responsableColumn, actionColumn);
     }
 
     private Callback<TableColumn<Tache, Void>, TableCell<Tache, Void>> createButtonCellFactory() {
@@ -133,14 +150,10 @@ public class VueGestionTache extends BorderPane {
             @Override
             public TableCell<Tache, Void> call(final TableColumn<Tache, Void> param) {
                 final TableCell<Tache, Void> cell = new TableCell<>() {
-                    private final Button btnEdit = new Button("Edit");
                     private final Button btnDelete = new Button("Delete");
 
                     {
-                        btnEdit.setOnAction(event -> {
-                            Tache tache = getTableView().getItems().get(getIndex());
-                            handleEditTache(tache);
-                        });
+
 
                         btnDelete.setOnAction(event -> {
                             Tache tache = getTableView().getItems().get(getIndex());
@@ -154,7 +167,7 @@ public class VueGestionTache extends BorderPane {
                         if (empty) {
                             setGraphic(null);
                         } else {
-                            HBox hBox = new HBox(10, btnEdit, btnDelete);
+                            HBox hBox = new HBox(10, btnDelete);
                             setGraphic(hBox);
                         }
                     }
@@ -194,21 +207,94 @@ public class VueGestionTache extends BorderPane {
     }
 
     private void handleEditTache(Tache tache) {
-        // Logique pour modifier la tâche
-        System.out.println("Modifier tâche: " + tache);
-    }
-
-    private void handleDeleteTache(Tache tache) {
         try {
-            HttpResponseWrapper responseWrapper = httpService.sendDeleteRequest("taches/"+tache.getTacheID());
+            DateTimeFormatter formatter = DateTimeFormatter.ISO_INSTANT;
+            String requestBody = "{"
+                    + "\"description\":\"" + tache.getDescription() + "\","
+                    + "\"dateDebut\":\"" + formatter.format(tache.getDateDebut()) + "\","
+                    + "\"dateFin\":\"" + formatter.format(tache.getDateFin()) + "\","
+                    + "\"statut\":\"" + tache.getStatut() + "\","
+                    + "\"responsable\":" + tache.getResponsable().getId()
+                    + "}";
+
+            HttpResponseWrapper responseWrapper = httpService.sendPatchRequest("taches/" + tache.getTacheID(), requestBody);
             jsonResponse = responseWrapper.getBody();
             statusCode = responseWrapper.getStatusCode();
             fetchAndPopulateTacheData();
-
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
+
+    private void handleDeleteTache(Tache tache) {
+        try {
+            HttpResponseWrapper responseWrapper = httpService.sendDeleteRequest("taches/" + tache.getTacheID());
+            jsonResponse = responseWrapper.getBody();
+            statusCode = responseWrapper.getStatusCode();
+            fetchAndPopulateTacheData();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    // Custom DatePicker cell factory for Instant
+    class DatePickerCell extends TableCell<Tache, Instant> {
+        private final DatePicker datePicker = new DatePicker();
+        private final boolean isDateDebut;
+
+        DatePickerCell(boolean isDateDebut) {
+            this.isDateDebut = isDateDebut;
+
+            datePicker.setConverter(new StringConverter<>() {
+                private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
+                @Override
+                public String toString(LocalDate date) {
+                    if (date != null) {
+                        return formatter.format(date);
+                    } else {
+                        return "";
+                    }
+                }
+
+                @Override
+                public LocalDate fromString(String string) {
+                    if (string != null && !string.isEmpty()) {
+                        return LocalDate.parse(string, formatter);
+                    } else {
+                        return null;
+                    }
+                }
+            });
+
+            datePicker.setOnAction(event -> {
+                if (getTableRow() != null && getTableRow().getItem() != null) {
+                    Tache tache = getTableRow().getItem();
+                    Instant instant = datePicker.getValue().atStartOfDay(ZoneId.systemDefault()).toInstant();
+                    if (isDateDebut) {
+                        tache.setDateDebut(instant);
+                        commitEdit(instant);
+                    } else {
+                        tache.setDateFin(instant);
+                        commitEdit(instant);
+                    }
+                    handleEditTache(tache);
+                }
+            });
+
+            setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
+            setGraphic(datePicker);
+        }
+
+        @Override
+        protected void updateItem(Instant item, boolean empty) {
+            super.updateItem(item, empty);
+            if (empty || item == null) {
+                setGraphic(null);
+            } else {
+                datePicker.setValue(LocalDate.ofInstant(item, ZoneId.systemDefault()));
+                setGraphic(datePicker);
+            }
+        }
+    }
 }
-
-
