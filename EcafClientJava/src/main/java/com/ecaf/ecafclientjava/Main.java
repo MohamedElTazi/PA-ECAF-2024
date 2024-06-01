@@ -118,8 +118,10 @@ public class Main extends Application {
 
                 if (reponse.isPresent() && !reponse.get().getKey().isEmpty() && !reponse.get().getValue().isEmpty()) {
                     try {
-                        String username = reponse.get().getKey();
-                        String password = reponse.get().getValue();
+                        //String username = reponse.get().getKey();
+                        //String password = reponse.get().getValue();
+                        String username = "alice.martin@email.com";
+                        String password = "motdepasse2";
                         String requestBody = "{\"email\":\"" + username + "\", \"motDePasse\":\"" + password + "\"}";
                         //User admin = new User();
 
@@ -134,7 +136,6 @@ public class Main extends Application {
                             User admin = new User(Integer.parseInt(userNode.get("id").asText()), userNode.get("nom").asText(), userNode.get("prenom").asText(), userNode.get("email").asText(), userNode.get("motDePasse").asText(), userNode.get("role").asText(), Instant.parse(userNode.get("dateInscription").asText()) , userNode.get("estBenevole").asBoolean(), jsonResponse.get("token").asText());
 
                             Session.ouvrir(admin);
-                            System.out.println(Session.getSession().getLeVisiteur());
                             itemConnecter.setDisable(true);
                             itemDeconnecter.setDisable(false);
                             menuRessource.setDisable(false);

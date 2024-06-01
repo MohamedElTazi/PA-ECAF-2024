@@ -4,8 +4,12 @@ package com.ecaf.ecafclientjava.entites;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+import java.time.Instant;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class User {
     private int id;
     private String nom;
@@ -15,35 +19,32 @@ public class User {
     private String role;
     private boolean estBenevole;
     private Instant dateInscription;
-
     private String token;
 
-    // Associations
-    private List<Reservation> reservations;
-    private List<Tache> tachesResponsable;
-
-
+    // Constructeur par défaut
+    public User() {
+    }
 
     // Constructeur
-    public User(int userID, String nom, String prenom, String email, String motDePasse, String role,  Instant dateInscription ,boolean estBenevole, String token) {
-        this.id = userID;
+    public User(int id, String nom, String prenom, String email, String motDePasse, String role, Instant dateInscription, boolean estBenevole, String token) {
+        this.id = id;
         this.nom = nom;
         this.prenom = prenom;
         this.email = email;
         this.motDePasse = motDePasse;
         this.role = role;
-        this.estBenevole = estBenevole;
         this.dateInscription = dateInscription;
+        this.estBenevole = estBenevole;
         this.token = token;
     }
 
     // Getters et setters
-    public int getUserID() {
+    public int getId() {
         return id;
     }
 
-    public void setUserID(int userID) {
-        this.id = userID;
+    public void setId(int id) {
+        this.id = id;
     }
 
     public String getNom() {
@@ -102,22 +103,6 @@ public class User {
         this.dateInscription = dateInscription;
     }
 
-    public List<Reservation> getReservations() {
-        return reservations;
-    }
-
-    public void setReservations(List<Reservation> reservations) {
-        this.reservations = reservations;
-    }
-
-    public List<Tache> getTachesResponsable() {
-        return tachesResponsable;
-    }
-
-    public void setTachesResponsable(List<Tache> tachesResponsable) {
-        this.tachesResponsable = tachesResponsable;
-    }
-
     public String getToken() {
         return token;
     }
@@ -129,7 +114,7 @@ public class User {
     @Override
     public String toString() {
         return "User{" +
-                "userID=" + id +
+                "id=" + id +
                 ", nom='" + nom + '\'' +
                 ", prenom='" + prenom + '\'' +
                 ", email='" + email + '\'' +
@@ -138,8 +123,6 @@ public class User {
                 ", estBenevole=" + estBenevole +
                 ", dateInscription=" + dateInscription +
                 ", token='" + token + '\'' +
-                ", reservations=" + reservations +
-                ", tachesResponsable=" + tachesResponsable +
                 '}';
     }
 }
