@@ -84,7 +84,7 @@ public class Main extends Application {
         root.setTop(barreMenus);
 
         Scene scene = new Scene(root, 1080, 720);
-        stage.setTitle("Hello!");
+        stage.setTitle("ECAF");
         stage.setScene(scene);
         stage.show();
 
@@ -155,12 +155,17 @@ public class Main extends Application {
                     statusCode = responseWrapper.getStatusCode();
 
                     Session.fermer();
+                    itemConnecter.setDisable(false);
+                    itemDeconnecter.setDisable(true);
+                    menuRessource.setDisable(true);
+                    menuTache.setDisable(true);
+
+
                     root.setCenter(new Text("Vous êtes déconnecté"));
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-                itemConnecter.setDisable(false);
-                itemDeconnecter.setDisable(true);
+
             }
         });
 
