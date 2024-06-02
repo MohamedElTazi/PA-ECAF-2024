@@ -1,0 +1,35 @@
+.root {
+    -fx-font-family: 'Arial';
+}
+
+.menu-bar {
+    -fx-background-color: #E8E288;
+    -fx-padding: 15 20 15 20;
+
+}
+
+.menu-bar .menu {
+    -fx-text-fill: black;
+    -fx-font-weight: bold;
+}
+
+.menu-bar .menu:hover {
+    -fx-background-color: #faf2b4;
+}
+
+.menu-item {
+    -fx-text-fill: black ; /* Texte des items en gris foncé */
+    -fx-background-color: white /* Couleur de fond des items en gris clair */
+}
+
+.menu-item:focused, .menu-item:hover {
+    -fx-background-color: #faf2b4; /* Couleur de fond au survol des items */
+    -fx-text-fill: #333333; /* Texte des items au survol */
+}
+
+.label {
+    -fx-font-size: 14px;
+    -fx-text-fill: #333333;
+    -fx-font-weight: bold;
+}
+

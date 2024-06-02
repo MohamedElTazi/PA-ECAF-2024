@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 
+import com.ecaf.ecafclientjava.entites.Ressource;
 import com.ecaf.ecafclientjava.entites.Tache;
 import com.ecaf.ecafclientjava.entites.User;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -69,11 +70,11 @@ public class HttpService {
         return new HttpResponseWrapper(jsonNode, statusCode);
     }
 
-    public HttpResponseWrapper sendDeleteRequest(String endpoint) throws IOException, InterruptedException {
+    public HttpResponseWrapper sendDeleteRequest(String endpoint, String requestBody) throws IOException, InterruptedException {
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(Urlapi.BASE_URL.getUrl() + endpoint))
                 .header("Content-Type", "application/json")
-                .DELETE()
+                .method("DELETE", HttpRequest.BodyPublishers.ofString(requestBody))
                 .build();
 
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
@@ -85,6 +86,21 @@ public class HttpService {
 
     public List<User> getUsersByRole(String role) throws IOException, InterruptedException {
         String endpoint = "users?role=" + role;
+        HttpResponseWrapper responseWrapper = sendGetRequest(endpoint);
+        List<User> users = new ArrayList<>();
+        if (responseWrapper.getStatusCode() == 200) {
+            Gson gson = new GsonBuilder()
+                    .registerTypeAdapter(Instant.class, new InstantTypeAdapter())
+                    .create();
+            String responseBody = responseWrapper.getBody().toString(); // Convert JsonNode to String
+            UserResponse userResponse = gson.fromJson(responseBody, UserResponse.class);
+            users = userResponse.getUsers();
+        }
+        return users;
+    }
+
+    public List<User> getUsersByOnlineStatus() throws IOException, InterruptedException {
+        String endpoint = "users?estEnLigne=true";
         HttpResponseWrapper responseWrapper = sendGetRequest(endpoint);
         List<User> users = new ArrayList<>();
         if (responseWrapper.getStatusCode() == 200) {
@@ -112,6 +128,20 @@ public class HttpService {
 ;
         }
         return taches;
+    }
+
+    public List<Ressource> getAllRessources() throws IOException, InterruptedException {
+        String endpoint = "ressources"; // L'URL de votre endpoint pour récupérer les tâches
+        HttpResponseWrapper responseWrapper = sendGetRequest(endpoint);
+        List<Ressource> ressources = null;
+        if (responseWrapper.getStatusCode() == 200) {
+            Gson gson = new GsonBuilder().create();
+            String responseBody = responseWrapper.getBody().toString(); // Convert JsonNode to String
+            RessourceResponse tacheResponse = gson.fromJson(responseBody, RessourceResponse.class);
+            ressources = tacheResponse.getTaches();
+            ;
+        }
+        return ressources;
     }
 
     private JsonNode parseJson(String responseBody) {

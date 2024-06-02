@@ -20,13 +20,15 @@ public class User {
     private boolean estBenevole;
     private Instant dateInscription;
     private String token;
+    private boolean estEnLigne; // Ajoutez cet attribut
+
 
     // Constructeur par défaut
     public User() {
     }
 
     // Constructeur
-    public User(int id, String nom, String prenom, String email, String motDePasse, String role, Instant dateInscription, boolean estBenevole, String token) {
+    public User(int id, String nom, String prenom, String email, String motDePasse, String role, Instant dateInscription, boolean estBenevole, String token, boolean estEnLigne) {
         this.id = id;
         this.nom = nom;
         this.prenom = prenom;
@@ -36,6 +38,7 @@ public class User {
         this.dateInscription = dateInscription;
         this.estBenevole = estBenevole;
         this.token = token;
+        this.estEnLigne = estEnLigne;
     }
 
     // Getters et setters
@@ -111,6 +114,14 @@ public class User {
         this.token = token;
     }
 
+    public boolean isEstEnLigne() {
+        return estEnLigne;
+    }
+
+    public void setEstEnLigne(boolean estEnLigne) {
+        this.estEnLigne = estEnLigne;
+    }
+
     @Override
     public String toString() {
         return "User{" +
@@ -123,6 +134,7 @@ public class User {
                 ", estBenevole=" + estBenevole +
                 ", dateInscription=" + dateInscription +
                 ", token='" + token + '\'' +
+                ", estEnLigne=" + estEnLigne +
                 '}';
     }
 }

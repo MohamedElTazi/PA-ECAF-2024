@@ -228,7 +228,7 @@ public class VueGestionTache extends BorderPane {
 
     private void handleDeleteTache(Tache tache) {
         try {
-            HttpResponseWrapper responseWrapper = httpService.sendDeleteRequest("taches/" + tache.getTacheID());
+            HttpResponseWrapper responseWrapper = httpService.sendDeleteRequest("taches/" + tache.getTacheID(),"");
             jsonResponse = responseWrapper.getBody();
             statusCode = responseWrapper.getStatusCode();
             fetchAndPopulateTacheData();

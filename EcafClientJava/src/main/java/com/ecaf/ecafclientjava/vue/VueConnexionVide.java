@@ -17,13 +17,18 @@ public class VueConnexionVide extends Dialog {
         this.setHeaderText(saisie);
 
         VBox vbSaisies = new VBox();
+        vbSaisies.getStyleClass().add("vbox");
 
         Label label = new Label("Votre identifiant ou votre mot de passe est manquant");
+        label.getStyleClass().add("label");
 
         vbSaisies.getChildren().add(label);
 
 
+        this.getDialogPane().getStylesheets().add(getClass().getResource("/com/ecaf/ecafclientjava/css/theme-clair/vueConnexionEchoueVide.css").toExternalForm());
+        this.getDialogPane().getStyleClass().add("dialog-pane");
 
+        this.getDialogPane().setContent(vbSaisies);
         this.getDialogPane().setContent(vbSaisies);
 
         ButtonType FERMER = new ButtonType(fermer, ButtonBar.ButtonData.CANCEL_CLOSE);
