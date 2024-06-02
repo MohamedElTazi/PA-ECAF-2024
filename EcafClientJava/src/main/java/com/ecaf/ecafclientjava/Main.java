@@ -2,6 +2,7 @@ package com.ecaf.ecafclientjava;
 
 import com.ecaf.ecafclientjava.technique.HttpResponseWrapper;
 import com.ecaf.ecafclientjava.technique.HttpService;
+import com.ecaf.ecafclientjava.vue.VueCalendrier;
 import com.ecaf.ecafclientjava.vue.VueConnexion;
 
 import com.ecaf.ecafclientjava.vue.VueConnexionEchoue;
@@ -20,6 +21,7 @@ import javafx.stage.Stage;
 import javafx.util.Pair;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.Optional;
 
 public class Main extends Application {
@@ -67,11 +69,14 @@ public class Main extends Application {
 
         MenuItem itemGestionTaches = new MenuItem("Gestion des taches");
         MenuItem itemPlanificationTaches = new MenuItem("Planification des taches");
+        MenuItem itemCalendrier = new MenuItem("Ouvrir le Calendrier");
 
         Menu menuTache= new Menu("Tache");
 
         menuTache.getItems().add(itemGestionTaches);
         menuTache.getItems().add(itemPlanificationTaches);
+        menuTache.getItems().add(itemCalendrier);
+
 
         barreMenus.getMenus().add(menuTache);
 
@@ -172,6 +177,11 @@ public class Main extends Application {
                     alertQuitter.close();
                 }
             }
+        });
+
+        itemCalendrier.setOnAction(event -> {
+            VueCalendrier vueCalendrier = new VueCalendrier();
+            vueCalendrier.show();
         });
 
 
