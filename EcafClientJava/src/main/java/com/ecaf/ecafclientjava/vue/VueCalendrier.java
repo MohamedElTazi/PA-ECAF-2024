@@ -34,7 +34,7 @@ public class VueCalendrier extends Dialog<Void> {
         // Set column constraints for equal width
         for (int i = 0; i < 7; i++) {
             ColumnConstraints colConstraints = new ColumnConstraints();
-            colConstraints.setPercentWidth(100.0 / 7); // each column takes up 1/7th of the width
+            colConstraints.setPercentWidth(100.0 / 7); 
             calendarGrid.getColumnConstraints().add(colConstraints);
         }
 
@@ -59,7 +59,8 @@ public class VueCalendrier extends Dialog<Void> {
         this.getDialogPane().getButtonTypes().add(ButtonType.CLOSE);
 
         eventMap = new HashMap<>();
-        // Ajouter des événements de test
+
+        
         eventMap.put(LocalDate.now(), new Evenement(LocalDate.now(), "Événement Test"));
 
         updateCalendar(currentYearMonth);
