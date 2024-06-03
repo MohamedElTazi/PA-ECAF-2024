@@ -3,8 +3,8 @@ package com.ecaf.ecafclientjava.entites;
 import java.time.LocalDate;
 
 public class Evenement {
-    private final LocalDate date;
-    private final String description;
+    private LocalDate date;
+    private String description;
 
     public Evenement(LocalDate date, String description) {
         this.date = date;
@@ -16,6 +16,10 @@ public class Evenement {
     }
 
     public String getDescription() {
+        return description;
+    }
+
+    public String getTitre() {
         return description;
     }
 }
