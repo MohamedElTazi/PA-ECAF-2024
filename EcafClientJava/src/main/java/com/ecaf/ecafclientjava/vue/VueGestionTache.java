@@ -4,8 +4,6 @@ import com.ecaf.ecafclientjava.entites.Tache;
 import com.ecaf.ecafclientjava.entites.User;
 import com.ecaf.ecafclientjava.technique.HttpResponseWrapper;
 import com.ecaf.ecafclientjava.technique.HttpService;
-import com.ecaf.ecafclientjava.technique.InstantStringConverter;
-import com.ecaf.ecafclientjava.technique.Session;
 import com.fasterxml.jackson.databind.JsonNode;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
@@ -18,10 +16,8 @@ import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
-import javafx.scene.text.Text;
 import javafx.util.Callback;
 import javafx.util.StringConverter;
-import javafx.util.converter.LocalDateStringConverter;
 
 import java.io.IOException;
 import java.time.Instant;
@@ -34,16 +30,13 @@ public class VueGestionTache extends BorderPane {
     HttpService httpService = new HttpService();
     private JsonNode jsonResponse;
     private int statusCode;
-    private TableView<User> adminTableView = new TableView<>();
-    private TableView<User> adherentTableView = new TableView<>();
-
+    private TableView<User> userTableView = new TableView<>();
     private TableView<Tache> tacheTableView = new TableView<>();
 
     public VueGestionTache() {
         // Configure the TableView
         configureTacheTableView();
-        configureUserTableView(adherentTableView);
-        configureUserTableView(adminTableView);
+        configureUserTableView(userTableView);
 
         // Fetch and populate data
         fetchAndPopulateTacheData();
@@ -52,10 +45,13 @@ public class VueGestionTache extends BorderPane {
         // Set the layout
         VBox vbox = new VBox(10);
         vbox.setPadding(new Insets(20, 20, 20, 20));
-        vbox.getChildren().addAll(tacheTableView, adherentTableView, adminTableView);
+        vbox.getChildren().addAll(tacheTableView, userTableView);
 
         // Add to the BorderPane
         setCenter(vbox);
+
+        // Apply CSS
+        this.getStylesheets().add(getClass().getResource("/com/ecaf/ecafclientjava/css/theme-clair/tableauFormulaire.css").toExternalForm());
     }
 
     private void configureUserTableView(TableView<User> tableView) {
@@ -75,6 +71,11 @@ public class VueGestionTache extends BorderPane {
         roleColumn.setCellValueFactory(new PropertyValueFactory<>("role"));
 
         tableView.getColumns().addAll(idColumn, nomColumn, prenomColumn, emailColumn, roleColumn);
+
+        // Appliquer la politique de redimensionnement automatique
+        tableView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+
+        applyTableStyles(tableView);
     }
 
     private void configureTacheTableView() {
@@ -143,6 +144,18 @@ public class VueGestionTache extends BorderPane {
         actionColumn.setCellFactory(createButtonCellFactory());
 
         tacheTableView.getColumns().addAll(idColumn, descriptionColumn, dateDebutColumn, dateFinColumn, statutColumn, idResponsableColumn, responsableColumn, actionColumn);
+
+        // Appliquer la politique de redimensionnement automatique
+        tacheTableView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+
+        applyTableStyles(tacheTableView);
+    }
+
+    private void applyTableStyles(TableView<?> tableView) {
+        tableView.getStyleClass().add("table-view");
+        for (TableColumn<?, ?> column : tableView.getColumns()) {
+            column.getStyleClass().add("table-column-header");
+        }
     }
 
     private Callback<TableColumn<Tache, Void>, TableCell<Tache, Void>> createButtonCellFactory() {
@@ -153,8 +166,6 @@ public class VueGestionTache extends BorderPane {
                     private final Button btnDelete = new Button("Delete");
 
                     {
-
-
                         btnDelete.setOnAction(event -> {
                             Tache tache = getTableView().getItems().get(getIndex());
                             handleDeleteTache(tache);
@@ -196,11 +207,11 @@ public class VueGestionTache extends BorderPane {
             List<User> admins = httpService.getUsersByRole("Administrateur");
             List<User> adherents = httpService.getUsersByRole("Adherent");
 
-            ObservableList<User> adminData = FXCollections.observableList(admins);
-            ObservableList<User> adherentData = FXCollections.observableList(adherents);
+            ObservableList<User> userData = FXCollections.observableArrayList();
+            userData.addAll(admins);
+            userData.addAll(adherents);
 
-            adminTableView.setItems(adminData);
-            adherentTableView.setItems(adherentData);
+            userTableView.setItems(userData);
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         }

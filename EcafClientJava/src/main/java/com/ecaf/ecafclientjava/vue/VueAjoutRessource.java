@@ -8,8 +8,7 @@ import javafx.scene.layout.*;
 
 
 
-
-public class VueAjoutRessource extends Pane {
+public class VueAjoutRessource extends BorderPane {
 
     private TextField nomField = new TextField();
     private ComboBox<String> typeComboBox = new ComboBox<>();
@@ -21,9 +20,10 @@ public class VueAjoutRessource extends Pane {
     public VueAjoutRessource() {
         // GridPane for form
         GridPane grid = new GridPane();
-        grid.setPadding(new Insets(20, 20, 20, 20));
-        grid.setVgap(10);
-        grid.setHgap(10);
+        grid.setPadding(new Insets(40, 40, 40, 40));
+        grid.setVgap(30);
+        grid.setHgap(30);
+        grid.getStyleClass().add("grid-pane");
 
         // Form elements
         Label nomLabel = new Label("Nom:");
@@ -55,11 +55,15 @@ public class VueAjoutRessource extends Pane {
         grid.setBorder(new Border(new BorderStroke(javafx.scene.paint.Color.BLACK, BorderStrokeStyle.SOLID, new CornerRadii(5), BorderWidths.DEFAULT)));
 
         // Main layout with HBox
-        HBox mainLayout = new HBox(20);
-        mainLayout.setPadding(new Insets(20, 20, 20, 20));
+        HBox mainLayout = new HBox(50);
+        mainLayout.setPadding(new Insets(40, 40, 40, 40));
+        mainLayout.getStyleClass().add("hbox");
         mainLayout.getChildren().addAll(grid);
 
-        getChildren().add(mainLayout);
+        setCenter(mainLayout);
+
+        // Apply CSS
+        this.getStylesheets().add(getClass().getResource("/com/ecaf/ecafclientjava/css/theme-clair/tableauFormulaire.css").toExternalForm());
     }
 
     private void handleSubmit() {

@@ -34,15 +34,15 @@ public class VueMenuPrincipal extends BorderPane {
 
         // Create layout for the table
         VBox tableBox = new VBox(10);
-        tableBox.setPadding(new Insets(10));
+        tableBox.setPadding(new Insets(40, 40, 40, 40));
         tableBox.setAlignment(Pos.TOP_RIGHT);
         tableBox.getChildren().add(userTableView);
 
-        // Set preferred size for the table
-        userTableView.setPrefSize(300, 200);
-
         // Add to the BorderPane
         setTop(tableBox);
+
+        // Apply CSS
+        this.getStylesheets().add(getClass().getResource("/com/ecaf/ecafclientjava/css/theme-clair/tableauFormulaire.css").toExternalForm());
     }
 
     private void configureUserTableView() {
@@ -64,8 +64,9 @@ public class VueMenuPrincipal extends BorderPane {
 
         TableColumn<User, Boolean> onlineColumn = new TableColumn<>("Online");
         onlineColumn.setCellValueFactory(new PropertyValueFactory<>("estEnLigne"));
+        onlineColumn.getStyleClass().add("table-column-header");
         onlineColumn.setCellFactory(column -> new TableCell<>() {
-            private final Circle circle = new Circle(5);
+            private final Circle circle = new Circle(13);
 
             @Override
             protected void updateItem(Boolean item, boolean empty) {

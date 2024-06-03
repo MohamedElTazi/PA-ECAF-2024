@@ -110,7 +110,7 @@ public class VuePlanificationTache extends Pane {
         getChildren().add(mainLayout);
 
         // Appliquer le fichier CSS
-        this.getStylesheets().add(getClass().getResource("/com/ecaf/ecafclientjava/css/theme-clair/planification-tache.css").toExternalForm());
+        this.getStylesheets().add(getClass().getResource("/com/ecaf/ecafclientjava/css/theme-clair/tableauFormulaire.css").toExternalForm());
     }
 
     private void configureUserTableView(TableView<User> tableView) {

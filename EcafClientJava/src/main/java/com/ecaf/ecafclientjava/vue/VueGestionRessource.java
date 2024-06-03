@@ -31,16 +31,13 @@ public class VueGestionRessource extends BorderPane {
     HttpService httpService = new HttpService();
     private JsonNode jsonResponse;
     private int statusCode;
-
-
     private final TableView<Ressource> ressourceTableView = new TableView<>();
 
     public VueGestionRessource() {
         configureRessourceTableView();
 
-
         // Fetch and populate data
-        fetchAndPopulateTacheData();
+        fetchAndPopulateRessourceData();
 
         // Set the layout
         VBox vbox = new VBox(10);
@@ -49,9 +46,10 @@ public class VueGestionRessource extends BorderPane {
 
         // Add to the BorderPane
         setCenter(vbox);
+
+        // Apply CSS
+        this.getStylesheets().add(getClass().getResource("/com/ecaf/ecafclientjava/css/theme-clair/tableauFormulaire.css").toExternalForm());
     }
-
-
 
     private void configureRessourceTableView() {
         ressourceTableView.setEditable(true);
@@ -109,9 +107,19 @@ public class VueGestionRessource extends BorderPane {
         actionColumn.setCellFactory(createButtonCellFactory());
 
         ressourceTableView.getColumns().addAll(idColumn, nomColumn, typeColumn, quantiteColumn, emplacementColumn, actionColumn);
+
+        // Appliquer la politique de redimensionnement automatique
+        ressourceTableView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+
+        applyTableStyles(ressourceTableView);
     }
 
-
+    private void applyTableStyles(TableView<?> tableView) {
+        tableView.getStyleClass().add("table-view");
+        for (TableColumn<?, ?> column : tableView.getColumns()) {
+            column.getStyleClass().add("table-column-header");
+        }
+    }
 
     private Callback<TableColumn<Ressource, Void>, TableCell<Ressource, Void>> createButtonCellFactory() {
         return new Callback<>() {
@@ -121,8 +129,6 @@ public class VueGestionRessource extends BorderPane {
                     private final Button btnDelete = new Button("Delete");
 
                     {
-
-
                         btnDelete.setOnAction(event -> {
                             Ressource ressource = getTableView().getItems().get(getIndex());
                             handleDeleteRessource(ressource);
@@ -145,21 +151,17 @@ public class VueGestionRessource extends BorderPane {
         };
     }
 
-
-    private void fetchAndPopulateTacheData() {
-        HttpService httpService = new HttpService();
+    private void fetchAndPopulateRessourceData() {
         try {
             List<Ressource> ressources = httpService.getAllRessources(); // Assurez-vous que cette méthode existe dans votre HttpService
 
-            ObservableList<Ressource> tacheData = FXCollections.observableList(ressources);
+            ObservableList<Ressource> ressourceData = FXCollections.observableList(ressources);
 
-            ressourceTableView.setItems(tacheData);
+            ressourceTableView.setItems(ressourceData);
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         }
     }
-
-
 
     private void handleEditRessource(Ressource ressource) {
         try {
@@ -173,7 +175,7 @@ public class VueGestionRessource extends BorderPane {
             HttpResponseWrapper responseWrapper = httpService.sendPatchRequest("ressources/" + ressource.getRessourceID(), requestBody);
             jsonResponse = responseWrapper.getBody();
             statusCode = responseWrapper.getStatusCode();
-            fetchAndPopulateTacheData();
+            fetchAndPopulateRessourceData();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -184,11 +186,9 @@ public class VueGestionRessource extends BorderPane {
             HttpResponseWrapper responseWrapper = httpService.sendDeleteRequest("ressources/" + ressource.getRessourceID(),"");
             jsonResponse = responseWrapper.getBody();
             statusCode = responseWrapper.getStatusCode();
-            fetchAndPopulateTacheData();
+            fetchAndPopulateRessourceData();
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
-
-
 }
