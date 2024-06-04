@@ -12,16 +12,20 @@ import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import javafx.util.Pair;
 
 import java.io.IOException;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -36,10 +40,7 @@ public class Main extends Application {
 
     @Override
     public void start(Stage stage) throws IOException {
-        List<Evenement> evenements = new ArrayList<>();
-        // Ajout d'événements pour démonstration
-        evenements.add(new Evenement(LocalDate.now(), "Réunion"));
-        evenements.add(new Evenement(LocalDate.now().plusDays(2), "Anniversaire"));
+        List<Evenement> evenements = loadEventsFromApi(); // Charger les événements depuis l'API
 
         VueCalendrier vueCalendrier = new VueCalendrier(evenements);
 
@@ -122,6 +123,28 @@ public class Main extends Application {
         itemQuitter.setOnAction(event -> Platform.exit());
 
         return barreMenus;
+    }
+
+    private List<Evenement> loadEventsFromApi() {
+        List<Evenement> evenements = new ArrayList<>();
+        try {
+            HttpResponseWrapper response = httpService.sendGetRequest("/evenements");
+            JsonNode eventsNode = response.getBody();
+
+            if (eventsNode.isArray()) {
+                DateTimeFormatter formatter = DateTimeFormatter.ISO_DATE_TIME;
+                for (JsonNode eventNode : eventsNode) {
+                    String nom = eventNode.get("nom").asText();
+                    LocalDate date = LocalDate.parse(eventNode.get("date").asText(), formatter);
+                    String description = eventNode.get("description").asText();
+                    String lieu = eventNode.get("lieu").asText();
+                    evenements.add(new Evenement(date, nom, description, lieu));
+                }
+            }
+        } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
+        }
+        return evenements;
     }
 
     public static void main(String[] args) {
