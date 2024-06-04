@@ -6,24 +6,25 @@
     -fx-padding: 40;
     -fx-hgap: 30;
     -fx-vgap: 30;
-    -fx-border-color: #cccccc;
+    -fx-border-color: #555555; /* Couleur de bordure sombre */
     -fx-border-width: 1;
     -fx-border-radius: 5;
-    -fx-background-color: #f8f8f8;
+    -fx-background-color: #333333; /* Couleur de fond sombre */
 }
 
 .label {
     -fx-font-size: 14px;
-    -fx-text-fill: #333333;
+    -fx-text-fill: #f8f8f8; /* Texte en blanc */
     -fx-font-weight: bold;
 }
 
 .text-field, .combo-box, .date-picker {
-    -fx-background-color: white;
-    -fx-border-color: #cccccc;
+    -fx-background-color: #444444; /* Couleur de fond sombre */
+    -fx-border-color: #555555; /* Couleur de bordure sombre */
     -fx-border-radius: 5;
     -fx-padding: 5;
     -fx-font-size: 14px;
+    -fx-text-fill: #f8f8f8; /* Texte en blanc */
 }
 
 .button {
@@ -57,6 +58,7 @@
 .button-delete:hover {
     -fx-background-color: #FC715F;
 }
+
 .vbox {
     -fx-spacing: 10;
     -fx-padding: 40;
@@ -70,35 +72,34 @@
 .table-view {
     -fx-pref-width: 800; /* Agrandir la largeur du tableau */
     -fx-pref-height: 400; /* Agrandir la hauteur du tableau */
-    -fx-border-color: #cccccc;
+    -fx-border-color: #555555; /* Couleur de bordure sombre */
     -fx-border-width: 1;
     -fx-border-radius: 5;
-    -fx-background-color: #ffffff;
+    -fx-background-color: #333333; /* Couleur de fond sombre */
     -fx-table-cell-border-color: transparent;
     -fx-padding: 15;
-
 }
 
 .table-view .column-header-background {
-    -fx-background-color: #ffffff;
+    -fx-background-color: #444444; /* Couleur de fond sombre */
     -fx-padding: 10;
 }
 
 .table-column-header {
     -fx-background-color: transparent;
-    -fx-text-fill: #333333;
+    -fx-text-fill: #f8f8f8; /* Texte en blanc */
     -fx-font-size: 14px;
     -fx-font-weight: bold;
     -fx-alignment: CENTER_LEFT;
     -fx-padding: 6 6;
 }
 
-
 .table-row-cell:filled:focused, .table-row-cell:filled:hover {
-    -fx-background-color: #faf2b4;
-    -fx-text-fill: #333333; /* Assurez-vous que le texte est visible */
+    -fx-background-color: #555555; /* Couleur de fond au survol sombre */
+    -fx-text-fill: #f8f8f8; /* Texte des items au survol en blanc */
 }
+
 .table-cell {
-    -fx-border-color: #cccccc; /* Ajouter des bordures pour les cellules individuelles */
+    -fx-border-color: #555555; /* Couleur de bordure sombre */
     -fx-border-width: 0 1 1 0; /* Bordures droite et basse */
 }

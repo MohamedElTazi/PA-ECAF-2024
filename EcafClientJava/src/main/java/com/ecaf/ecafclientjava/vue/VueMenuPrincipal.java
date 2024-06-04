@@ -2,6 +2,7 @@ package com.ecaf.ecafclientjava.vue;
 
 import com.ecaf.ecafclientjava.entites.User;
 import com.ecaf.ecafclientjava.technique.HttpService;
+import com.ecaf.ecafclientjava.technique.Theme;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
@@ -41,8 +42,8 @@ public class VueMenuPrincipal extends BorderPane {
         // Add to the BorderPane
         setTop(tableBox);
 
-        // Apply CSS
-        this.getStylesheets().add(getClass().getResource("/com/ecaf/ecafclientjava/css/theme-clair/tableauFormulaire.css").toExternalForm());
+        // Apply initial CSS
+        applyCurrentTheme();
     }
 
     private void configureUserTableView() {
@@ -101,5 +102,11 @@ public class VueMenuPrincipal extends BorderPane {
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         }
+    }
+
+    public void applyCurrentTheme() {
+        this.getStylesheets().clear();
+        this.getStylesheets().add(getClass().getResource(Theme.themeTableauFormulaire).toExternalForm());
+        this.setStyle("-fx-background-color: " + Theme.backgroudColorMain + ";");
     }
 }

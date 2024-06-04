@@ -3,6 +3,7 @@ package com.ecaf.ecafclientjava.vue;
 import com.ecaf.ecafclientjava.entites.User;
 import com.ecaf.ecafclientjava.technique.HttpResponseWrapper;
 import com.ecaf.ecafclientjava.technique.HttpService;
+import com.ecaf.ecafclientjava.technique.Theme;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
@@ -74,9 +75,9 @@ public class VuePlanificationTache extends Pane {
         responsableIdComboBox.getStyleClass().add("combo-box");
 
         GridPane.setConstraints(submitButton, 1, 5);
-        submitButton.getStyleClass().add("button");
+        submitButton.getStyleClass().add("button-submit");
         GridPane.setConstraints(resetButton, 2, 5);
-        resetButton.getStyleClass().add("button");
+        resetButton.getStyleClass().add("button-reset");
 
         submitButton.setOnAction(e -> handleSubmit());
         resetButton.setOnAction(e -> handleReset());
@@ -110,7 +111,7 @@ public class VuePlanificationTache extends Pane {
         getChildren().add(mainLayout);
 
         // Appliquer le fichier CSS
-        this.getStylesheets().add(getClass().getResource("/com/ecaf/ecafclientjava/css/theme-clair/tableauFormulaire.css").toExternalForm());
+        applyCurrentTheme();
     }
 
     private void configureUserTableView(TableView<User> tableView) {
@@ -174,6 +175,10 @@ public class VuePlanificationTache extends Pane {
     }
 
     private void handleSubmit() {
+        if (descriptionField.getText().isEmpty() || dateDebutPicker == null || dateFinPicker == null || statutComboBox.getValue() == null || responsableIdComboBox.getValue() == null) {
+            showAlert(Alert.AlertType.ERROR, "Erreur Formulaire!", "Veuillez remplir tous les champs du formulaire.");
+            return;
+        }
         String description = descriptionField.getText();
         LocalDateTime dateDebut = dateDebutPicker.getValue().atStartOfDay();
         LocalDateTime dateFin = dateFinPicker.getValue() != null ? dateFinPicker.getValue().atStartOfDay() : null;
@@ -181,15 +186,11 @@ public class VuePlanificationTache extends Pane {
         Integer responsableId = responsableIdComboBox.getValue();
 
         // Add validation and error handling
-        if (description.isEmpty() || dateDebut == null || statut == null || responsableId == null) {
-            showAlert(Alert.AlertType.ERROR, "Form Error!", "Please fill all required fields.");
-            return;
-        }
 
         // Format dates for database
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         String dateDebutStr = dateDebut.format(formatter);
-        String dateFinStr = dateFin != null ? dateFin.format(formatter) : null;
+        String dateFinStr = dateFin.format(formatter);
 
         // Prepare JSON or any other format to send to backend
         String requestBody = String.format("{\"description\":\"%s\", \"dateDebut\":\"%s\", \"dateFin\":\"%s\", \"statut\":\"%s\", \"responsable\":%d}",
@@ -201,14 +202,14 @@ public class VuePlanificationTache extends Pane {
             HttpResponseWrapper responseWrapper = httpService.sendPostRequest("taches", requestBody);
             System.out.println(responseWrapper.getBody());
             if (Objects.equals(responseWrapper.getStatusCode(), 201)) {
-                showAlert(Alert.AlertType.INFORMATION, "Success", "Task added successfully!");
+                showAlert(Alert.AlertType.INFORMATION, "Success", "Tache créé avec succès !");
                 handleReset();
             } else {
-                showAlert(Alert.AlertType.ERROR, "Error", "Failed to add task.");
+                showAlert(Alert.AlertType.ERROR, "Error", "\n" + "Échec de l'ajout d'une tache.");
             }
         } catch (Exception ex) {
             ex.printStackTrace();
-            showAlert(Alert.AlertType.ERROR, "Error", "An error occurred.");
+            showAlert(Alert.AlertType.ERROR, "Error", "Une erreur est survenue !");
         }
     }
 
@@ -226,5 +227,11 @@ public class VuePlanificationTache extends Pane {
         alert.setHeaderText(null);
         alert.setContentText(message);
         alert.showAndWait();
+    }
+
+    public void applyCurrentTheme() {
+        this.getStylesheets().clear();
+        this.getStylesheets().add(getClass().getResource(Theme.themeTableauFormulaire).toExternalForm());
+        this.setStyle("-fx-background-color: " + Theme.backgroudColorMain + ";");
     }
 }

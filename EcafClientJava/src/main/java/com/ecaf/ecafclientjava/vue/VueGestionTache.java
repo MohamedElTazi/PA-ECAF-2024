@@ -4,6 +4,7 @@ import com.ecaf.ecafclientjava.entites.Tache;
 import com.ecaf.ecafclientjava.entites.User;
 import com.ecaf.ecafclientjava.technique.HttpResponseWrapper;
 import com.ecaf.ecafclientjava.technique.HttpService;
+import com.ecaf.ecafclientjava.technique.Theme;
 import com.fasterxml.jackson.databind.JsonNode;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
@@ -50,8 +51,8 @@ public class VueGestionTache extends BorderPane {
         // Add to the BorderPane
         setCenter(vbox);
 
-        // Apply CSS
-        this.getStylesheets().add(getClass().getResource("/com/ecaf/ecafclientjava/css/theme-clair/tableauFormulaire.css").toExternalForm());
+        // Apply initial CSS
+        applyCurrentTheme();
     }
 
     private void configureUserTableView(TableView<User> tableView) {
@@ -162,9 +163,9 @@ public class VueGestionTache extends BorderPane {
         return new Callback<>() {
             @Override
             public TableCell<Tache, Void> call(final TableColumn<Tache, Void> param) {
+                Button btnDelete = new Button("Delete");
+                btnDelete.getStyleClass().add("button-delete");
                 final TableCell<Tache, Void> cell = new TableCell<>() {
-                    private final Button btnDelete = new Button("Delete");
-
                     {
                         btnDelete.setOnAction(event -> {
                             Tache tache = getTableView().getItems().get(getIndex());
@@ -307,5 +308,11 @@ public class VueGestionTache extends BorderPane {
                 setGraphic(datePicker);
             }
         }
+    }
+
+    public void applyCurrentTheme() {
+        this.getStylesheets().clear();
+        this.getStylesheets().add(getClass().getResource(Theme.themeTableauFormulaire).toExternalForm());
+        this.setStyle("-fx-background-color: " + Theme.backgroudColorMain + ";");
     }
 }

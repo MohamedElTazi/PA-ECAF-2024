@@ -1,5 +1,6 @@
 package com.ecaf.ecafclientjava.vue;
 
+import com.ecaf.ecafclientjava.technique.Theme;
 import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
 import javafx.util.Callback;
@@ -27,7 +28,7 @@ public class VueConnexion extends Dialog<Pair<String, String>> {
         vbSaisies.getChildren().add(mdp);
 
         // Appliquer la classe CSS à la boîte de dialogue
-        this.getDialogPane().getStylesheets().add(getClass().getResource("/com/ecaf/ecafclientjava/css/theme-clair/vueConnexion.css").toExternalForm());
+        this.getDialogPane().getStylesheets().add(getClass().getResource(Theme.themeVueConnexion).toExternalForm());
         this.getDialogPane().getStyleClass().add("dialog-pane");
 
         this.getDialogPane().setContent(vbSaisies);

@@ -2,6 +2,7 @@ package com.ecaf.ecafclientjava.vue;
 
 import com.ecaf.ecafclientjava.technique.HttpResponseWrapper;
 import com.ecaf.ecafclientjava.technique.HttpService;
+import com.ecaf.ecafclientjava.technique.Theme;
 import javafx.geometry.Insets;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
@@ -48,7 +49,8 @@ public class VueAjoutRessource extends BorderPane {
 
         submitButton.setOnAction(e -> handleSubmit());
         resetButton.setOnAction(e -> handleReset());
-
+        submitButton.getStyleClass().add("button-submit");
+        resetButton.getStyleClass().add("button-reset");
         grid.getChildren().addAll(nomLabel, nomField, typeLabel, typeComboBox, quantiteLabel, quantiteField, emplacementLabel, emplacementField, submitButton, resetButton);
 
         // Adding border to the grid
@@ -62,8 +64,8 @@ public class VueAjoutRessource extends BorderPane {
 
         setCenter(mainLayout);
 
-        // Apply CSS
-        this.getStylesheets().add(getClass().getResource("/com/ecaf/ecafclientjava/css/theme-clair/tableauFormulaire.css").toExternalForm());
+        // Apply initial CSS
+        applyCurrentTheme();
     }
 
     private void handleSubmit() {
@@ -73,14 +75,14 @@ public class VueAjoutRessource extends BorderPane {
         try {
             quantite = Integer.parseInt(quantiteField.getText());
         } catch (NumberFormatException e) {
-            showAlert(Alert.AlertType.ERROR, "Form Error!", "Quantité must be a number.");
+            showAlert(Alert.AlertType.ERROR, "Erreur Formulaire!", "Quantité doit être un chiffre.");
             return;
         }
         String emplacement = emplacementField.getText();
 
         // Add validation and error handling
         if (nom.isEmpty() || type == null || quantite == null || emplacement.isEmpty()) {
-            showAlert(Alert.AlertType.ERROR, "Form Error!", "Please fill all required fields.");
+            showAlert(Alert.AlertType.ERROR, "Erreur Formulaire!", "Veuillez remplir tous les champs du formulaire.");
             return;
         }
 
@@ -92,14 +94,14 @@ public class VueAjoutRessource extends BorderPane {
             HttpService httpService = new HttpService();
             HttpResponseWrapper responseWrapper = httpService.sendPostRequest("ressources", requestBody);
             if (responseWrapper.getStatusCode() == 201) {
-                showAlert(Alert.AlertType.INFORMATION, "Success", "Resource added successfully!");
+                showAlert(Alert.AlertType.INFORMATION, "Succès", "Ressource créé avec succès !");
                 handleReset();
             } else {
-                showAlert(Alert.AlertType.ERROR, "Error", "Failed to add resource.");
+                showAlert(Alert.AlertType.ERROR, "Erreur", "\n" + "Échec de l'ajout d'une ressource.");
             }
         } catch (Exception ex) {
             ex.printStackTrace();
-            showAlert(Alert.AlertType.ERROR, "Error", "An error occurred.");
+            showAlert(Alert.AlertType.ERROR, "Erreur", "Une erreur est survenue !");
         }
     }
 
@@ -116,5 +118,11 @@ public class VueAjoutRessource extends BorderPane {
         alert.setHeaderText(null);
         alert.setContentText(message);
         alert.showAndWait();
+    }
+
+    public void applyCurrentTheme() {
+        this.getStylesheets().clear();
+        this.getStylesheets().add(getClass().getResource(Theme.themeTableauFormulaire).toExternalForm());
+        this.setStyle("-fx-background-color: " + Theme.backgroudColorMain + ";");
     }
 }
