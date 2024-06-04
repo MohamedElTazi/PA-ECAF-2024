@@ -1,5 +1,6 @@
 package com.ecaf.ecafclientjava.vue;
 
+import com.ecaf.ecafclientjava.technique.Theme;
 import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Dialog;
@@ -25,7 +26,7 @@ public class VueConnexionVide extends Dialog {
         vbSaisies.getChildren().add(label);
 
 
-        this.getDialogPane().getStylesheets().add(getClass().getResource("/com/ecaf/ecafclientjava/css/theme-clair/vueConnexionEchoueVide.css").toExternalForm());
+        this.getDialogPane().getStylesheets().add(getClass().getResource(Theme.themeVueConnexionEchoueVide).toExternalForm());
         this.getDialogPane().getStyleClass().add("dialog-pane");
 
         this.getDialogPane().setContent(vbSaisies);

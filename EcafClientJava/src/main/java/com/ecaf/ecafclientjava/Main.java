@@ -164,39 +164,42 @@ public class Main extends Application {
                 VueConnexion vue = new VueConnexion();
                 Optional<Pair<String, String>> reponse = vue.showAndWait();
 
-                if (reponse.isPresent() && !reponse.get().getKey().isEmpty() && !reponse.get().getValue().isEmpty()) {
-                    try {
-                        String username = "alice.martin@email.com";
-                        String password = "motdepasse2";
-                        String requestBody = "{\"email\":\"" + username + "\", \"motDePasse\":\"" + password + "\"}";
+                if (reponse.isPresent()) {
+                    Pair<String, String> result = reponse.get();
+                    if (!result.getKey().isEmpty() && !result.getValue().isEmpty()) {
+                        try {
+                            String username = "alice.martin@email.com";
+                            String password = "motdepasse2";
+                            String requestBody = "{\"email\":\"" + username + "\", \"motDePasse\":\"" + password + "\"}";
 
-                        HttpResponseWrapper responseWrapper = httpService.sendPostRequest("auth/login", requestBody);
-                        jsonResponse = responseWrapper.getBody();
-                        statusCode = responseWrapper.getStatusCode();
+                            HttpResponseWrapper responseWrapper = httpService.sendPostRequest("auth/login", requestBody);
+                            jsonResponse = responseWrapper.getBody();
+                            statusCode = responseWrapper.getStatusCode();
 
-                        if (statusCode == 200) {
-                            JsonNode userNode = jsonResponse.get("user");
-                            User admin = new User(Integer.parseInt(userNode.get("id").asText()), userNode.get("nom").asText(), userNode.get("prenom").asText(), userNode.get("email").asText(), userNode.get("motDePasse").asText(), userNode.get("role").asText(), Instant.parse(userNode.get("dateInscription").asText()), userNode.get("estBenevole").asBoolean(), jsonResponse.get("token").asText(), false);
+                            if (statusCode == 200) {
+                                JsonNode userNode = jsonResponse.get("user");
+                                User admin = new User(Integer.parseInt(userNode.get("id").asText()), userNode.get("nom").asText(), userNode.get("prenom").asText(), userNode.get("email").asText(), userNode.get("motDePasse").asText(), userNode.get("role").asText(), Instant.parse(userNode.get("dateInscription").asText()), userNode.get("estBenevole").asBoolean(), jsonResponse.get("token").asText(), false);
 
-                            Session.ouvrir(admin);
-                            itemConnecter.setDisable(true);
-                            itemDeconnecter.setDisable(false);
-                            menuRessource.setDisable(false);
-                            menuTache.setDisable(false);
-                            menuPrincipal.setDisable(false);
+                                Session.ouvrir(admin);
+                                itemConnecter.setDisable(true);
+                                itemDeconnecter.setDisable(false);
+                                menuRessource.setDisable(false);
+                                menuTache.setDisable(false);
+                                menuPrincipal.setDisable(false);
 
-                            vueMenuPrincipal = new VueMenuPrincipal();
-                            root.setCenter(vueMenuPrincipal);
-                        } else {
-                            VueConnexionEchoue vueEchoue = new VueConnexionEchoue();
-                            vueEchoue.showAndWait();
+                                vueMenuPrincipal = new VueMenuPrincipal();
+                                root.setCenter(vueMenuPrincipal);
+                            } else {
+                                VueConnexionEchoue vueEchoue = new VueConnexionEchoue();
+                                vueEchoue.showAndWait();
+                            }
+                        } catch (Exception e) {
+                            e.printStackTrace();
                         }
-                    } catch (Exception e) {
-                        e.printStackTrace();
+                    } else {
+                        VueConnexionVide vueVide = new VueConnexionVide();
+                        vueVide.showAndWait();
                     }
-                } else {
-                    VueConnexionVide vueVide = new VueConnexionVide();
-                    vueVide.showAndWait();
                 }
             }
         });
