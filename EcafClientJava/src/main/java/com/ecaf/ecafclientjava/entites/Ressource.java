@@ -5,8 +5,6 @@ public class Ressource {
     private String nom;
     private String type;
     private int quantite;
-
-
     private String emplacement;
 
 

@@ -110,7 +110,6 @@ public class Main extends Application {
                 new EventHandler<ActionEvent>() {
                     @Override
                     public void handle(ActionEvent event) {
-                        System.out.println("clair");
                         Theme.applyTheme("clair", scene);
                         applyCurrentTheme();
                         if (vueMenuPrincipal != null) {
@@ -136,7 +135,6 @@ public class Main extends Application {
                 new EventHandler<ActionEvent>() {
                     @Override
                     public void handle(ActionEvent event) {
-                        System.out.println("sombre");
                         Theme.applyTheme("sombre", scene);
                         applyCurrentTheme();
                         if (vueMenuPrincipal != null) {
