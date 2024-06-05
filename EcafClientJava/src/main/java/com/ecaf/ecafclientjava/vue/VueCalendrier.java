@@ -1,121 +1,115 @@
 package com.ecaf.ecafclientjava.vue;
 
 import com.ecaf.ecafclientjava.entites.Evenement;
-import javafx.geometry.HPos;
+import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
-import javafx.stage.Stage;
-import javafx.geometry.Insets;
-import javafx.geometry.Pos;
+import javafx.scene.text.Font;
+
 import java.time.LocalDate;
 import java.time.YearMonth;
-import java.time.format.TextStyle;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
+import java.util.List;
+import java.util.stream.Collectors;
 
-public class VueCalendrier extends Dialog<Void> {
+public class VueCalendrier extends VBox {
 
     private YearMonth currentYearMonth;
     private final GridPane calendarGrid;
     private final Label monthYearLabel;
-    private final Map<LocalDate, Evenement> eventMap;
+    private final List<Evenement> evenements;
+    private final ListView<String> eventListView;
 
-    public VueCalendrier() {
-        this.setTitle("Sélection de Date");
-        this.setHeaderText("Calendrier");
-
+    public VueCalendrier(List<Evenement> evenements) {
+        this.evenements = evenements;
         currentYearMonth = YearMonth.now();
-        calendarGrid = new GridPane();
-        calendarGrid.setPadding(new Insets(10));
-        calendarGrid.setHgap(10);
-        calendarGrid.setVgap(10);
 
-        // Set column constraints for equal width
+        // Header with navigation and month/year label
+        HBox header = new HBox();
+        Button prevMonthButton = new Button("<<");
+        prevMonthButton.setOnAction(e -> changeMonth(-1));
+        Button nextMonthButton = new Button(">>");
+        nextMonthButton.setOnAction(e -> changeMonth(1));
+        monthYearLabel = new Label();
+        header.getChildren().addAll(prevMonthButton, monthYearLabel, nextMonthButton);
+        header.setAlignment(Pos.CENTER);
+        HBox.setHgrow(monthYearLabel, Priority.ALWAYS);
+        monthYearLabel.setMaxWidth(Double.MAX_VALUE);
+        monthYearLabel.setAlignment(Pos.CENTER);
+        monthYearLabel.setFont(new Font("Arial", 24));
+
+        // Calendar grid
+        calendarGrid = new GridPane();
+        calendarGrid.setGridLinesVisible(true);
+        calendarGrid.setAlignment(Pos.CENTER);
+        calendarGrid.setPrefSize(800, 600);
         for (int i = 0; i < 7; i++) {
-            ColumnConstraints colConstraints = new ColumnConstraints();
-            colConstraints.setPercentWidth(100.0 / 7); // each column takes up 1/7th of the width
-            calendarGrid.getColumnConstraints().add(colConstraints);
+            ColumnConstraints col = new ColumnConstraints();
+            col.setPercentWidth(100.0 / 7);
+            calendarGrid.getColumnConstraints().add(col);
         }
 
-        monthYearLabel = new Label();
-        monthYearLabel.setStyle("-fx-font-size: 20px;");
+        for (int i = 0; i < 7; i++) {
+            RowConstraints row = new RowConstraints();
+            row.setPercentHeight(100.0 / 7);
+            calendarGrid.getRowConstraints().add(row);
+        }
 
-        Button prevMonthButton = new Button("<<");
-        Button nextMonthButton = new Button(">>");
+        // Event list view
+        eventListView = new ListView<>();
+        eventListView.setPrefHeight(200);
 
-        prevMonthButton.setOnAction(e -> updateCalendar(currentYearMonth.minusMonths(1)));
-        nextMonthButton.setOnAction(e -> updateCalendar(currentYearMonth.plusMonths(1)));
+        updateCalendar();
 
-        HBox header = new HBox(prevMonthButton, monthYearLabel, nextMonthButton);
-        header.setAlignment(Pos.CENTER);
-        header.setSpacing(10);
-
-        VBox vbox = new VBox(header, calendarGrid);
-        vbox.setAlignment(Pos.CENTER);
-        vbox.setSpacing(20);
-
-        this.getDialogPane().setContent(vbox);
-        this.getDialogPane().getButtonTypes().add(ButtonType.CLOSE);
-
-        eventMap = new HashMap<>();
-        // Ajouter des événements de test
-        eventMap.put(LocalDate.now(), new Evenement(LocalDate.now(), "Événement Test"));
-
-        updateCalendar(currentYearMonth);
+        this.getChildren().addAll(header, calendarGrid, eventListView);
     }
 
-    private void updateCalendar(YearMonth yearMonth) {
-        currentYearMonth = yearMonth;
-        monthYearLabel.setText(currentYearMonth.getMonth().getDisplayName(TextStyle.FULL, Locale.FRANCE) + " " + currentYearMonth.getYear());
-
+    private void updateCalendar() {
         calendarGrid.getChildren().clear();
+        monthYearLabel.setText(currentYearMonth.getMonth().toString() + " " + currentYearMonth.getYear());
 
         String[] daysOfWeek = {"dimanche", "lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi"};
-        for (int i = 0; i < daysOfWeek.length; i++) {
-            Label dayLabel = new Label(daysOfWeek[i]);
-            dayLabel.setStyle("-fx-font-weight: bold;");
+        for (int col = 0; col < daysOfWeek.length; col++) {
+            Label dayLabel = new Label(daysOfWeek[col]);
             dayLabel.setAlignment(Pos.CENTER);
-            calendarGrid.add(dayLabel, i, 0);
-            GridPane.setHalignment(dayLabel, HPos.CENTER);
+            dayLabel.setMaxWidth(Double.MAX_VALUE);
+            calendarGrid.add(dayLabel, col, 0);
         }
 
         LocalDate firstOfMonth = currentYearMonth.atDay(1);
-        int dayOfWeek = firstOfMonth.getDayOfWeek().getValue() % 7;
-        int daysInMonth = currentYearMonth.lengthOfMonth();
+        int dayOfWeek = firstOfMonth.getDayOfWeek().getValue() % 7; // Convert to Sunday=0, Monday=1, ..., Saturday=6
 
-        int row = 1;
-        int col = dayOfWeek;
-
-        for (int day = 1; day <= daysInMonth; day++) {
+        for (int day = 1; day <= currentYearMonth.lengthOfMonth(); day++) {
             LocalDate date = currentYearMonth.atDay(day);
             Button dayButton = new Button(String.valueOf(day));
-            dayButton.setMinSize(40, 40); // Set minimum size to make buttons uniform
-            dayButton.setOnAction(e -> showEventForDay(date));
-            calendarGrid.add(dayButton, col, row);
-            GridPane.setHalignment(dayButton, HPos.CENTER);
-            col++;
-            if (col == 7) {
-                col = 0;
-                row++;
+            dayButton.setMaxWidth(Double.MAX_VALUE);
+            dayButton.setMaxHeight(Double.MAX_VALUE);
+
+            if (hasEvent(date)) {
+                dayButton.setStyle("-fx-background-color: lightgreen;");
             }
+
+            dayButton.setOnAction(e -> handleDayClick(date));
+
+            int col = (dayOfWeek + day - 1) % 7;
+            int row = (dayOfWeek + day - 1) / 7 + 1;
+            calendarGrid.add(dayButton, col, row);
         }
     }
 
-    private void showEventForDay(LocalDate date) {
-        Evenement event = eventMap.get(date);
-        String message = (event != null) ? "Événement: " + event.getDescription() : "Aucun événement";
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Événement du " + date);
-        alert.setHeaderText(null);
-        alert.setContentText(message);
-        alert.showAndWait();
+    private boolean hasEvent(LocalDate date) {
+        return evenements.stream().anyMatch(event -> event.getDate().equals(date));
     }
 
-    public static void main(String[] args) {
-        VueCalendrier vueCalendrier = new VueCalendrier();
-        Stage stage = new Stage();
-        vueCalendrier.initOwner(stage);
-        vueCalendrier.showAndWait();
+    private void handleDayClick(LocalDate date) {
+        List<String> eventTitles = evenements.stream()
+                .filter(event -> event.getDate().equals(date))
+                .map(Evenement::getTitre)
+                .collect(Collectors.toList());
+        eventListView.getItems().setAll(eventTitles);
+    }
+
+    private void changeMonth(int months) {
+        currentYearMonth = currentYearMonth.plusMonths(months);
+        updateCalendar();
     }
 }
