@@ -1,0 +1,105 @@
+.root {
+    -fx-font-family: 'Arial';
+}
+
+.grid-pane {
+    -fx-padding: 40;
+    -fx-hgap: 30;
+    -fx-vgap: 30;
+    -fx-border-color: #555555; /* Couleur de bordure sombre */
+    -fx-border-width: 1;
+    -fx-border-radius: 5;
+    -fx-background-color: #333333; /* Couleur de fond sombre */
+}
+
+.label {
+    -fx-font-size: 14px;
+    -fx-text-fill: #f8f8f8; /* Texte en blanc */
+    -fx-font-weight: bold;
+}
+
+.text-field, .combo-box, .date-picker {
+    -fx-background-color: #444444; /* Couleur de fond sombre */
+    -fx-border-color: #555555; /* Couleur de bordure sombre */
+    -fx-border-radius: 5;
+    -fx-padding: 5;
+    -fx-font-size: 14px;
+    -fx-text-fill: #f8f8f8; /* Texte en blanc */
+}
+
+.button {
+    -fx-border-radius: 5;
+    -fx-padding: 10 20;
+}
+
+.button-submit {
+    -fx-background-color: #4CAF50;
+    -fx-text-fill: white;
+}
+
+.button-submit:hover {
+    -fx-background-color: #45a049;
+}
+
+.button-reset {
+    -fx-background-color: #FFA500;
+    -fx-text-fill: white;
+}
+
+.button-reset:hover {
+    -fx-background-color: #FF8C00;
+}
+
+.button-delete {
+    -fx-background-color: #FB3C23;
+    -fx-text-fill: white;
+}
+
+.button-delete:hover {
+    -fx-background-color: #FC715F;
+}
+
+.vbox {
+    -fx-spacing: 10;
+    -fx-padding: 40;
+}
+
+.hbox {
+    -fx-spacing: 50;
+    -fx-padding: 40;
+}
+
+.table-view {
+    -fx-pref-width: 800; /* Agrandir la largeur du tableau */
+    -fx-pref-height: 400; /* Agrandir la hauteur du tableau */
+    -fx-border-color: #555555; /* Couleur de bordure sombre */
+    -fx-border-width: 1;
+    -fx-border-radius: 5;
+    -fx-background-color: #333333; /* Couleur de fond sombre */
+    -fx-table-cell-border-color: transparent;
+    -fx-padding: 15;
+}
+
+.table-view .column-header-background {
+    -fx-background-color: #444444; /* Couleur de fond sombre */
+    -fx-padding: 10;
+}
+
+.table-column-header {
+    -fx-background-color: transparent;
+    -fx-text-fill: #f8f8f8; /* Texte en blanc */
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-alignment: CENTER_LEFT;
+    -fx-padding: 6 6;
+}
+
+.table-row-cell:filled:focused, .table-row-cell:filled:hover {
+    -fx-background-color: #555555; /* Couleur de fond au survol sombre */
+    -fx-text-fill: #f8f8f8; /* Texte des items au survol en blanc */
+}
+
+.table-cell {
+    -fx-border-color: #555555; /* Couleur de bordure sombre */
+    -fx-border-width: 0 1 1 0; /* Bordures droite et basse */
+}

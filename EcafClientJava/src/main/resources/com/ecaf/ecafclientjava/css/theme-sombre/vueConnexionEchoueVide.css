@@ -1,0 +1,39 @@
+.dialog-pane {
+    -fx-padding: 20;
+    -fx-background-color: #333333; /* Couleur de fond sombre */
+    -fx-border-color: #555555; /* Couleur de bordure sombre */
+    -fx-border-width: 1;
+    -fx-border-radius: 5;
+    -fx-background-radius: 5;
+}
+
+.label {
+    -fx-font-size: 14px;
+    -fx-text-fill: #f8f8f8; /* Texte en blanc */
+    -fx-font-weight: bold;
+}
+
+.text-field {
+    -fx-background-color: #444444; /* Couleur de fond sombre */
+    -fx-border-color: #555555; /* Couleur de bordure sombre */
+    -fx-border-radius: 3;
+    -fx-padding: 5;
+    -fx-font-size: 14px;
+    -fx-text-fill: #f8f8f8; /* Texte en blanc */
+}
+
+.button-bar .button {
+    -fx-background-color: #666666; /* Couleur de fond sombre */
+    -fx-text-fill: #f8f8f8; /* Texte en blanc */
+    -fx-border-radius: 3;
+    -fx-padding: 5 10;
+}
+
+.button-bar .button:hover {
+    -fx-background-color: #555555; /* Couleur de fond au survol sombre */
+    -fx-text-fill: #f8f8f8; /* Texte en blanc */
+}
+
+.vbox {
+    -fx-spacing: 10;
+}

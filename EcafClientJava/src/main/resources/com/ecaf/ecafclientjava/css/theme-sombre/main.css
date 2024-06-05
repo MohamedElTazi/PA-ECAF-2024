@@ -1,0 +1,35 @@
+.root {
+    -fx-font-family: 'Arial';
+    -fx-background-color: #333333;
+}
+
+.menu-bar {
+    -fx-background-color: #E8E288;
+    -fx-padding: 15 20 15 20;
+
+}
+
+.menu-bar .menu {
+    -fx-text-fill: #f8f8f8; /* Texte en blanc */
+    -fx-font-weight: bold;
+}
+
+.menu-bar .menu:hover {
+    -fx-background-color: #555555; /* Couleur de fond au survol sombre */
+}
+
+.menu-item {
+    -fx-text-fill: #f8f8f8; /* Texte en blanc */
+    -fx-background-color: #444444; /* Couleur de fond sombre */
+}
+
+.menu-item:focused, .menu-item:hover {
+    -fx-background-color: #555555; /* Couleur de fond au survol des items sombre */
+    -fx-text-fill: #f8f8f8; /* Texte des items au survol en blanc */
+}
+
+.label {
+    -fx-font-size: 14px;
+    -fx-text-fill: #f8f8f8; /* Texte en blanc */
+    -fx-font-weight: bold;
+}

@@ -1,0 +1,104 @@
+.root {
+    -fx-font-family: 'Arial';
+}
+
+.grid-pane {
+    -fx-padding: 40;
+    -fx-hgap: 30;
+    -fx-vgap: 30;
+    -fx-border-color: #cccccc;
+    -fx-border-width: 1;
+    -fx-border-radius: 5;
+    -fx-background-color: #f8f8f8;
+}
+
+.label {
+    -fx-font-size: 14px;
+    -fx-text-fill: #333333;
+    -fx-font-weight: bold;
+}
+
+.text-field, .combo-box, .date-picker {
+    -fx-background-color: white;
+    -fx-border-color: #cccccc;
+    -fx-border-radius: 5;
+    -fx-padding: 5;
+    -fx-font-size: 14px;
+}
+
+.button {
+    -fx-border-radius: 5;
+    -fx-padding: 10 20;
+}
+
+.button-submit {
+    -fx-background-color: #4CAF50;
+    -fx-text-fill: white;
+}
+
+.button-submit:hover {
+    -fx-background-color: #45a049;
+}
+
+.button-reset {
+    -fx-background-color: #FFA500;
+    -fx-text-fill: white;
+}
+
+.button-reset:hover {
+    -fx-background-color: #FF8C00;
+}
+
+.button-delete {
+    -fx-background-color: #FB3C23;
+    -fx-text-fill: white;
+}
+
+.button-delete:hover {
+    -fx-background-color: #FC715F;
+}
+.vbox {
+    -fx-spacing: 10;
+    -fx-padding: 40;
+}
+
+.hbox {
+    -fx-spacing: 50;
+    -fx-padding: 40;
+}
+
+.table-view {
+    -fx-pref-width: 800; /* Agrandir la largeur du tableau */
+    -fx-pref-height: 400; /* Agrandir la hauteur du tableau */
+    -fx-border-color: #cccccc;
+    -fx-border-width: 1;
+    -fx-border-radius: 5;
+    -fx-background-color: #ffffff;
+    -fx-table-cell-border-color: transparent;
+    -fx-padding: 15;
+
+}
+
+.table-view .column-header-background {
+    -fx-background-color: #ffffff;
+    -fx-padding: 10;
+}
+
+.table-column-header {
+    -fx-background-color: transparent;
+    -fx-text-fill: #333333;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-alignment: CENTER_LEFT;
+    -fx-padding: 6 6;
+}
+
+
+.table-row-cell:filled:focused, .table-row-cell:filled:hover {
+    -fx-background-color: #faf2b4;
+    -fx-text-fill: #333333; /* Assurez-vous que le texte est visible */
+}
+.table-cell {
+    -fx-border-color: #cccccc; /* Ajouter des bordures pour les cellules individuelles */
+    -fx-border-width: 0 1 1 0; /* Bordures droite et basse */
+}
