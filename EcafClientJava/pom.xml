@@ -89,7 +89,7 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <mainClass>com.ecaf.ecafclientjava.LoginApp</mainClass>
+                    <mainClass>com.ecaf.ecafclientjava.Main</mainClass>
                 </configuration>
             </plugin>
         </plugins>
