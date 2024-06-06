@@ -2,11 +2,6 @@ package com.ecaf.ecafclientjava.entites;
 
 
 import java.time.Instant;
-import java.time.LocalDate;
-import java.util.List;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-
-import java.time.Instant;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)

@@ -25,7 +25,10 @@ import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import javafx.util.Pair;
 
+import java.io.BufferedInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.URL;
 import java.time.Instant;
 import java.util.Optional;
 public class Main extends Application {
@@ -43,9 +46,15 @@ public class Main extends Application {
     private VueGestionTache vueGestionTache;
     private VuePlanificationTache vuePlanificationTache;
 
+    private static final String CURRENT_VERSION = "version_1.0.1";
+    private static final String UPDATE_URL_TEMPLATE = "https://github.com/username/repo/releases/download/%s/MyApp.jar";
+
     @Override
-    public void start(Stage stage) throws IOException {
-        Text text = new Text("ECAF Client");
+    public void start(Stage stage) throws IOException, InterruptedException {
+        checkForUpdates();
+
+        // Code existant pour configurer l'application JavaFX
+        Text text = new Text("ECAF ClientJAR");
         text.setFont(new Font("Arial", 24));
         root.setPadding(new Insets(10, 10, 10, 10));
         root.setId("rootPane");
@@ -106,105 +115,134 @@ public class Main extends Application {
 
         applyCurrentTheme(); // Appliquer le thème initial
 
-        itemModeClair.setOnAction(
-                new EventHandler<ActionEvent>() {
-                    @Override
-                    public void handle(ActionEvent event) {
-                        Theme.applyTheme("clair", scene);
-                        applyCurrentTheme();
-                        if (vueMenuPrincipal != null) {
-                            vueMenuPrincipal.applyCurrentTheme();
+        itemModeClair.setOnAction(event -> {
+            Theme.applyTheme("clair", scene);
+            applyCurrentTheme();
+            if (vueMenuPrincipal != null) {
+                vueMenuPrincipal.applyCurrentTheme();
+            }
+            if (vueGestionRessource != null) {
+                vueGestionRessource.applyCurrentTheme();
+            }
+            if (vueAjoutRessource != null) {
+                vueAjoutRessource.applyCurrentTheme();
+            }
+            if (vueGestionTache != null) {
+                vueGestionTache.applyCurrentTheme();
+            }
+            if (vuePlanificationTache != null) {
+                vuePlanificationTache.applyCurrentTheme();
+            }
+        });
+
+        itemModeSombre.setOnAction(event -> {
+            Theme.applyTheme("sombre", scene);
+            applyCurrentTheme();
+            if (vueMenuPrincipal != null) {
+                vueMenuPrincipal.applyCurrentTheme();
+            }
+            if (vueGestionRessource != null) {
+                vueGestionRessource.applyCurrentTheme();
+            }
+            if (vueAjoutRessource != null) {
+                vueAjoutRessource.applyCurrentTheme();
+            }
+            if (vueGestionTache != null) {
+                vueGestionTache.applyCurrentTheme();
+            }
+            if (vuePlanificationTache != null) {
+                vuePlanificationTache.applyCurrentTheme();
+            }
+        });
+
+        itemConnecter.setOnAction(event -> {
+            VueConnexion vue = new VueConnexion();
+            Optional<Pair<String, String>> reponse = vue.showAndWait();
+
+            if (reponse.isPresent()) {
+                Pair<String, String> result = reponse.get();
+                if (!result.getKey().isEmpty() && !result.getValue().isEmpty()) {
+                    try {
+                        String username = "alice.martin@email.com";
+                        String password = "motdepasse2";
+                        String requestBody = "{\"email\":\"" + username + "\", \"motDePasse\":\"" + password + "\"}";
+
+                        HttpResponseWrapper responseWrapper = httpService.sendPostRequest("auth/login", requestBody);
+                        jsonResponse = responseWrapper.getBody();
+                        statusCode = responseWrapper.getStatusCode();
+
+                        if (statusCode == 200) {
+                            JsonNode userNode = jsonResponse.get("user");
+                            User admin = new User(Integer.parseInt(userNode.get("id").asText()), userNode.get("nom").asText(), userNode.get("prenom").asText(), userNode.get("email").asText(), userNode.get("motDePasse").asText(), userNode.get("role").asText(), Instant.parse(userNode.get("dateInscription").asText()), userNode.get("estBenevole").asBoolean(), jsonResponse.get("token").asText(), false);
+
+                            Session.ouvrir(admin);
+                            itemConnecter.setDisable(true);
+                            itemDeconnecter.setDisable(false);
+                            menuRessource.setDisable(false);
+                            menuTache.setDisable(false);
+                            menuPrincipal.setDisable(false);
+
+                            vueMenuPrincipal = new VueMenuPrincipal();
+                            root.setCenter(vueMenuPrincipal);
+                        } else {
+                            VueConnexionEchoue vueEchoue = new VueConnexionEchoue();
+                            vueEchoue.showAndWait();
                         }
-                        if (vueGestionRessource != null) {
-                            vueGestionRessource.applyCurrentTheme();
-                        }
-                        if (vueAjoutRessource != null) {
-                            vueAjoutRessource.applyCurrentTheme();
-                        }
-                        if (vueGestionTache != null) {
-                            vueGestionTache.applyCurrentTheme();
-                        }
-                        if (vuePlanificationTache != null) {
-                            vuePlanificationTache.applyCurrentTheme();
-                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
                     }
-                }
-        );
-
-        itemModeSombre.setOnAction(
-                new EventHandler<ActionEvent>() {
-                    @Override
-                    public void handle(ActionEvent event) {
-                        Theme.applyTheme("sombre", scene);
-                        applyCurrentTheme();
-                        if (vueMenuPrincipal != null) {
-                            vueMenuPrincipal.applyCurrentTheme();
-                        }
-                        if (vueGestionRessource != null) {
-                            vueGestionRessource.applyCurrentTheme();
-                        }
-                        if (vueAjoutRessource != null) {
-                            vueAjoutRessource.applyCurrentTheme();
-                        }
-                        if (vueGestionTache != null) {
-                            vueGestionTache.applyCurrentTheme();
-                        }
-                        if (vuePlanificationTache != null) {
-                            vuePlanificationTache.applyCurrentTheme();
-                        }
-                    }
-                }
-        );
-
-        itemConnecter.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
-                VueConnexion vue = new VueConnexion();
-                Optional<Pair<String, String>> reponse = vue.showAndWait();
-
-                if (reponse.isPresent()) {
-                    Pair<String, String> result = reponse.get();
-                    if (!result.getKey().isEmpty() && !result.getValue().isEmpty()) {
-                        try {
-                            String username = "alice.martin@email.com";
-                            String password = "motdepasse2";
-                            String requestBody = "{\"email\":\"" + username + "\", \"motDePasse\":\"" + password + "\"}";
-
-                            HttpResponseWrapper responseWrapper = httpService.sendPostRequest("auth/login", requestBody);
-                            jsonResponse = responseWrapper.getBody();
-                            statusCode = responseWrapper.getStatusCode();
-
-                            if (statusCode == 200) {
-                                JsonNode userNode = jsonResponse.get("user");
-                                User admin = new User(Integer.parseInt(userNode.get("id").asText()), userNode.get("nom").asText(), userNode.get("prenom").asText(), userNode.get("email").asText(), userNode.get("motDePasse").asText(), userNode.get("role").asText(), Instant.parse(userNode.get("dateInscription").asText()), userNode.get("estBenevole").asBoolean(), jsonResponse.get("token").asText(), false);
-
-                                Session.ouvrir(admin);
-                                itemConnecter.setDisable(true);
-                                itemDeconnecter.setDisable(false);
-                                menuRessource.setDisable(false);
-                                menuTache.setDisable(false);
-                                menuPrincipal.setDisable(false);
-
-                                vueMenuPrincipal = new VueMenuPrincipal();
-                                root.setCenter(vueMenuPrincipal);
-                            } else {
-                                VueConnexionEchoue vueEchoue = new VueConnexionEchoue();
-                                vueEchoue.showAndWait();
-                            }
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-                    } else {
-                        VueConnexionVide vueVide = new VueConnexionVide();
-                        vueVide.showAndWait();
-                    }
+                } else {
+                    VueConnexionVide vueVide = new VueConnexionVide();
+                    vueVide.showAndWait();
                 }
             }
         });
 
-        itemDeconnecter.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
+        itemDeconnecter.setOnAction(event -> {
+            try {
+                User userCourant = Session.getSession().getLeVisiteur();
+                String requestBody = "{\"token\":\"" + userCourant.getToken() + "\"}";
+                HttpResponseWrapper responseWrapper = httpService.sendDeleteRequest("auth/logout/" + userCourant.getId(), requestBody);
+                jsonResponse = responseWrapper.getBody();
+                statusCode = responseWrapper.getStatusCode();
+
+                if (statusCode == 201) {
+                    Session.fermer();
+                    itemConnecter.setDisable(false);
+                    itemDeconnecter.setDisable(true);
+                    menuRessource.setDisable(true);
+                    menuTache.setDisable(true);
+                    menuPrincipal.setDisable(true);
+
+                    root.setCenter(new Text("Vous êtes déconnecté"));
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
+
+        itemQuitter.setOnAction(event -> {
+            Alert alertQuitter = new Alert(Alert.AlertType.CONFIRMATION);
+            alertQuitter.setTitle("Quitter");
+            alertQuitter.setHeaderText("Demande de confirmation");
+            alertQuitter.setContentText("Voulez-vous quitter l'application ?");
+            ButtonType btnOui = new ButtonType("Oui");
+            ButtonType btnNon = new ButtonType("Non");
+
+            alertQuitter.getButtonTypes().setAll(btnOui, btnNon);
+
+            alertQuitter.getDialogPane().lookupButton(btnOui).getStyleClass().add("button-oui");
+            alertQuitter.getDialogPane().lookupButton(btnNon).getStyleClass().add("button-non");
+            DialogPane dialogPane = alertQuitter.getDialogPane();
+            dialogPane.getStylesheets().add(getClass().getResource(Theme.themeAlert).toExternalForm());
+            dialogPane.getStyleClass().add("alert");
+
+            Optional<ButtonType> reponse = alertQuitter.showAndWait();
+
+            if (reponse.isPresent() && reponse.get() == btnOui) {
+                if (Session.getSession() == null) {
+                    Platform.exit();
+                }
                 try {
                     User userCourant = Session.getSession().getLeVisiteur();
                     String requestBody = "{\"token\":\"" + userCourant.getToken() + "\"}";
@@ -214,115 +252,42 @@ public class Main extends Application {
 
                     if (statusCode == 201) {
                         Session.fermer();
-                        itemConnecter.setDisable(false);
-                        itemDeconnecter.setDisable(true);
-                        menuRessource.setDisable(true);
-                        menuTache.setDisable(true);
-                        menuPrincipal.setDisable(true);
-
-                        root.setCenter(new Text("Vous êtes déconnecté"));
+                        Platform.exit();
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
+            } else {
+                alertQuitter.close();
             }
         });
 
-        itemQuitter.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
-                Alert alertQuitter = new Alert(Alert.AlertType.CONFIRMATION);
-                alertQuitter.setTitle("Quitter");
-                alertQuitter.setHeaderText("Demande de confirmation");
-                alertQuitter.setContentText("Voulez-vous quitter l'application ?");
-                ButtonType btnOui = new ButtonType("Oui");
-                ButtonType btnNon = new ButtonType("Non");
-
-                alertQuitter.getButtonTypes().setAll(btnOui, btnNon);
-
-                alertQuitter.getDialogPane().lookupButton(btnOui).getStyleClass().add("button-oui");
-                alertQuitter.getDialogPane().lookupButton(btnNon).getStyleClass().add("button-non");
-                DialogPane dialogPane = alertQuitter.getDialogPane();
-                dialogPane.getStylesheets().add(getClass().getResource(Theme.themeAlert).toExternalForm());
-                dialogPane.getStyleClass().add("alert");
-
-                Optional<ButtonType> reponse = alertQuitter.showAndWait();
-
-                if (reponse.isPresent() && reponse.get() == btnOui) {
-                    if (Session.getSession() == null) {
-                        Platform.exit();
-                    }
-                    try {
-                        User userCourant = Session.getSession().getLeVisiteur();
-                        String requestBody = "{\"token\":\"" + userCourant.getToken() + "\"}";
-                        HttpResponseWrapper responseWrapper = httpService.sendDeleteRequest("auth/logout/" + userCourant.getId(), requestBody);
-                        jsonResponse = responseWrapper.getBody();
-                        statusCode = responseWrapper.getStatusCode();
-
-                        if (statusCode == 201) {
-                            Session.fermer();
-                            Platform.exit();
-                        }
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                } else {
-                    alertQuitter.close();
-                }
-            }
+        itemPlanificationTaches.setOnAction(event -> {
+            vuePlanificationTache = new VuePlanificationTache();
+            root.setCenter(vuePlanificationTache);
         });
 
-        itemPlanificationTaches.setOnAction(
-                new EventHandler<ActionEvent>() {
-                    @Override
-                    public void handle(ActionEvent event) {
-                        vuePlanificationTache = new VuePlanificationTache();
-                        root.setCenter(vuePlanificationTache);
-                    }
-                }
-        );
+        itemGestionTaches.setOnAction(event -> {
+            vueGestionTache = new VueGestionTache();
+            root.setCenter(vueGestionTache);
+        });
 
-        itemGestionTaches.setOnAction(
-                new EventHandler<ActionEvent>() {
-                    @Override
-                    public void handle(ActionEvent event) {
-                        vueGestionTache = new VueGestionTache();
-                        root.setCenter(vueGestionTache);
-                    }
-                }
-        );
+        itemCreationRessource.setOnAction(event -> {
+            vueAjoutRessource = new VueAjoutRessource();
+            root.setCenter(vueAjoutRessource);
+        });
 
-        itemCreationRessource.setOnAction(
-                new EventHandler<ActionEvent>() {
-                    @Override
-                    public void handle(ActionEvent event) {
-                        vueAjoutRessource = new VueAjoutRessource();
-                        root.setCenter(vueAjoutRessource);
-                    }
-                }
-        );
+        itemGestionRessources.setOnAction(event -> {
+            vueGestionRessource = new VueGestionRessource();
+            root.setCenter(vueGestionRessource);
+        });
 
-        itemGestionRessources.setOnAction(
-                new EventHandler<ActionEvent>() {
-                    @Override
-                    public void handle(ActionEvent event) {
-                        vueGestionRessource = new VueGestionRessource();
-                        root.setCenter(vueGestionRessource);
-                    }
-                }
-        );
+        itemMenuPrincipal.setOnAction(event -> {
+            vueMenuPrincipal = new VueMenuPrincipal();
+            root.setCenter(vueMenuPrincipal);
+        });
 
-        itemMenuPrincipal.setOnAction(
-                new EventHandler<ActionEvent>() {
-                    @Override
-                    public void handle(ActionEvent event) {
-                        vueMenuPrincipal = new VueMenuPrincipal();
-                        root.setCenter(vueMenuPrincipal);
-                    }
-                }
-        );
-
-        stage.setOnCloseRequest((EventHandler<WindowEvent>) event -> {
+        stage.setOnCloseRequest(event -> {
             // Consommer l'événement pour empêcher la fermeture de la fenêtre
             event.consume();
 
@@ -371,7 +336,48 @@ public class Main extends Application {
         root.setStyle("-fx-background-color: " + Theme.backgroudColorMain + ";");
     }
 
+    private void checkForUpdates() {
+        try {
+            HttpResponseWrapper httpResponseWrapper = httpService.sendGetRequest("fileVersion");
+            jsonResponse = httpResponseWrapper.getBody();
+            JsonNode fileVersionNode = jsonResponse.get("fileVersion");
+            String fileVersion = fileVersionNode.asText();
+
+            System.out.println("Version actuelle : " + CURRENT_VERSION);
+            System.out.println("Version disponible : " + fileVersion);
+
+            if (!CURRENT_VERSION.equals(fileVersion)) {
+                System.out.println("Nouvelle version disponible. Téléchargement en cours...");
+                String updateUrl = String.format(UPDATE_URL_TEMPLATE, fileVersion);
+
+                // Télécharger la mise à jour
+                downloadUpdate(updateUrl);
+                System.out.println("Mise à jour téléchargée. Redémarrage de l'application...");
+
+                // Remplacer l'ancien JAR par le nouveau et redémarrer l'application
+                Runtime.getRuntime().exec("java -jar update.jar");
+                System.exit(0);
+            } else {
+                System.out.println("L'application est à jour.");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void downloadUpdate(String updateUrl) throws IOException {
+        URL url = new URL(updateUrl);
+        try (BufferedInputStream in = new BufferedInputStream(url.openStream());
+             FileOutputStream fileOutputStream = new FileOutputStream("update.jar")) {
+            byte[] dataBuffer = new byte[1024];
+            int bytesRead;
+            while ((bytesRead = in.read(dataBuffer, 0, 1024)) != -1) {
+                fileOutputStream.write(dataBuffer, 0, bytesRead);
+            }
+        }
+    }
+
     public static void main(String[] args) {
-        launch();
+        Application.launch(Main.class, args);
     }
 }
