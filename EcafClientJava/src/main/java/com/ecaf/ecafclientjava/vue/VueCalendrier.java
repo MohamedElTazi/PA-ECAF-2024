@@ -1,14 +1,18 @@
 package com.ecaf.ecafclientjava.vue;
 
 import com.ecaf.ecafclientjava.entites.Evenement;
+import com.ecaf.ecafclientjava.entites.Tache;
 import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.scene.text.Font;
 
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.YearMonth;
+import java.time.ZoneId;
 import java.util.List;
+import java.util.Locale;
 import java.util.stream.Collectors;
 
 public class VueCalendrier extends VBox {
@@ -17,10 +21,12 @@ public class VueCalendrier extends VBox {
     private final GridPane calendarGrid;
     private final Label monthYearLabel;
     private final List<Evenement> evenements;
+    private final List<Tache> taches;
     private final ListView<String> eventListView;
 
-    public VueCalendrier(List<Evenement> evenements) {
+    public VueCalendrier(List<Evenement> evenements, List<Tache> taches) {
         this.evenements = evenements;
+        this.taches = taches;
         currentYearMonth = YearMonth.now();
 
         // Header with navigation and month/year label
@@ -41,7 +47,7 @@ public class VueCalendrier extends VBox {
         calendarGrid = new GridPane();
         calendarGrid.setGridLinesVisible(true);
         calendarGrid.setAlignment(Pos.CENTER);
-        calendarGrid.setPrefSize(800, 600);
+        calendarGrid.setPrefSize(500, 300);
         for (int i = 0; i < 7; i++) {
             ColumnConstraints col = new ColumnConstraints();
             col.setPercentWidth(100.0 / 7);
@@ -67,16 +73,24 @@ public class VueCalendrier extends VBox {
         calendarGrid.getChildren().clear();
         monthYearLabel.setText(currentYearMonth.getMonth().toString() + " " + currentYearMonth.getYear());
 
-        String[] daysOfWeek = {"dimanche", "lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi"};
+        DayOfWeek[] daysOfWeek = {
+                DayOfWeek.MONDAY,
+                DayOfWeek.TUESDAY,
+                DayOfWeek.WEDNESDAY,
+                DayOfWeek.THURSDAY,
+                DayOfWeek.FRIDAY,
+                DayOfWeek.SATURDAY,
+                DayOfWeek.SUNDAY
+        };
         for (int col = 0; col < daysOfWeek.length; col++) {
-            Label dayLabel = new Label(daysOfWeek[col]);
+            Label dayLabel = new Label(daysOfWeek[col].getDisplayName(java.time.format.TextStyle.FULL, Locale.FRANCE));
             dayLabel.setAlignment(Pos.CENTER);
             dayLabel.setMaxWidth(Double.MAX_VALUE);
             calendarGrid.add(dayLabel, col, 0);
         }
 
         LocalDate firstOfMonth = currentYearMonth.atDay(1);
-        int dayOfWeek = firstOfMonth.getDayOfWeek().getValue() % 7; // Convert to Sunday=0, Monday=1, ..., Saturday=6
+        int dayOfWeek = (firstOfMonth.getDayOfWeek().getValue() + 6) % 7; // Convert to Monday=0, Tuesday=1, ..., Sunday=6
 
         for (int day = 1; day <= currentYearMonth.lengthOfMonth(); day++) {
             LocalDate date = currentYearMonth.atDay(day);
@@ -84,7 +98,7 @@ public class VueCalendrier extends VBox {
             dayButton.setMaxWidth(Double.MAX_VALUE);
             dayButton.setMaxHeight(Double.MAX_VALUE);
 
-            if (hasEvent(date)) {
+            if (hasEvent(date) || hasTask(date)) {
                 dayButton.setStyle("-fx-background-color: lightgreen;");
             }
 
@@ -97,15 +111,27 @@ public class VueCalendrier extends VBox {
     }
 
     private boolean hasEvent(LocalDate date) {
-        return evenements.stream().anyMatch(event -> event.getDate().equals(date));
+        return evenements.stream()
+                .anyMatch(event -> LocalDate.ofInstant(event.getDate(), ZoneId.systemDefault()).equals(date));
+    }
+    private boolean hasTask(LocalDate date) {
+        return taches.stream()
+                .anyMatch(task -> LocalDate.ofInstant(task.getDateDebut(), ZoneId.systemDefault()).equals(date));
     }
 
     private void handleDayClick(LocalDate date) {
-        List<String> eventTitles = evenements.stream()
-                .filter(event -> event.getDate().equals(date))
-                .map(Evenement::getTitre)
+        List<String> eventDetails = evenements.stream()
+                .filter(event -> LocalDate.ofInstant(event.getDate(), ZoneId.systemDefault()).equals(date))
+                .map(event -> event.getNom() + " : " + event.getDescription())
                 .collect(Collectors.toList());
-        eventListView.getItems().setAll(eventTitles);
+
+        List<String> taskDetails = taches.stream()
+                .filter(task -> LocalDate.ofInstant(task.getDateDebut(), ZoneId.systemDefault()).equals(date))
+                .map(task -> "Tâche : " + task.getDescription())
+                .collect(Collectors.toList());
+
+        eventListView.getItems().setAll(eventDetails);
+        eventListView.getItems().addAll(taskDetails);
     }
 
     private void changeMonth(int months) {

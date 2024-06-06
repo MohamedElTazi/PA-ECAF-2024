@@ -1,6 +1,8 @@
 package com.ecaf.ecafclientjava;
 
 import com.ecaf.ecafclientjava.entites.Evenement;
+import com.ecaf.ecafclientjava.entites.Tache;
+import com.ecaf.ecafclientjava.entites.User;
 import com.ecaf.ecafclientjava.technique.HttpResponseWrapper;
 import com.ecaf.ecafclientjava.technique.HttpService;
 import com.ecaf.ecafclientjava.vue.VueCalendrier;
@@ -26,6 +28,7 @@ import javafx.stage.Stage;
 import javafx.util.Pair;
 
 import java.io.IOException;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -41,12 +44,14 @@ public class Main extends Application {
     private final HttpService httpService = new HttpService();
 
     @Override
-    public void start(Stage stage) throws IOException {
-        List<Evenement> evenements = loadEventsFromApi(); // Charger les événements depuis l'API
-        Evenement e = new Evenement("test", LocalDate.now(), "test", "chez moi");
-        evenements.add(e);
+    public void start(Stage stage) throws IOException, InterruptedException {
+        List<Evenement> evenements = httpService.getAllEvenement(); // Charger les événements depuis l'API
+        List<Tache> taches = new ArrayList<>();//httpService.getAllTache();
+        User u = new User(3, "TAZI", "Mohamed", "mohamed@email.com", "azerty", "administrateur", true, LocalDate.now());
+        Tache t = new Tache(1, "préparer matériel", Instant.now(), Instant.now(), "en cours", u);
+        taches.add(t);
 
-        VueCalendrier vueCalendrier = new VueCalendrier(evenements);
+        VueCalendrier vueCalendrier = new VueCalendrier(evenements, taches);
 
         Text text = new Text("ECAF Client");
         BorderPane root = new BorderPane();
@@ -131,17 +136,18 @@ public class Main extends Application {
         return barreMenus;
     }
 
+    /*
     private List<Evenement> loadEventsFromApi() {
         List<Evenement> evenements = new ArrayList<>();
         try {
-            HttpResponseWrapper response = httpService.sendGetRequest("/evenements");
+            HttpResponseWrapper response = httpService.sendGetRequest("evenements");
             JsonNode eventsNode = response.getBody();
 
             if (eventsNode.isArray()) {
                 DateTimeFormatter formatter = DateTimeFormatter.ISO_DATE_TIME;
                 for (JsonNode eventNode : eventsNode) {
                     String nom = eventNode.get("nom").asText();
-                    LocalDate date = LocalDate.parse(eventNode.get("date").asText().substring(0, 10));
+                    Instant date = Instant.parse(eventNode.get("date").asText().substring(0, 10));
                     String description = eventNode.get("description").asText();
                     String lieu = eventNode.get("lieu").asText();
                     evenements.add(new Evenement(nom, date, description, lieu));
@@ -151,7 +157,7 @@ public class Main extends Application {
             e.printStackTrace();
         }
         return evenements;
-    }
+    }*/
 
     public static void main(String[] args) {
         launch();

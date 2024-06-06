@@ -5,10 +5,19 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.time.Instant;
+import java.util.List;
 
 
+import com.ecaf.ecafclientjava.entites.Evenement;
+import com.ecaf.ecafclientjava.entites.Ressource;
+import com.ecaf.ecafclientjava.entites.Tache;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
 
 public class HttpService {
 
@@ -72,6 +81,37 @@ public class HttpService {
         JsonNode jsonNode = parseJson(response.body());
 
         return new HttpResponseWrapper(jsonNode, statusCode);
+    }
+
+    public List<Evenement> getAllEvenement() throws IOException, InterruptedException {
+        String endpoint = "evenements";
+        HttpResponseWrapper responseWrapper = sendGetRequest(endpoint);
+        List<Evenement> evenements = null;
+
+        if (responseWrapper.getStatusCode() == 200) {
+            Gson gson = new GsonBuilder()
+                    .registerTypeAdapter(Instant.class, new InstantTypeAdapter())
+                    .create();
+            JsonElement responseBody = JsonParser.parseString(responseWrapper.getBody().toString());
+            EventResponse eventResponse = gson.fromJson(responseBody, EventResponse.class);
+            evenements = eventResponse.getEvent();
+        }
+        return evenements;
+    }
+    public List<Tache> getAllTache() throws IOException, InterruptedException {
+        String endpoint = "taches";
+        HttpResponseWrapper responseWrapper = sendGetRequest(endpoint);
+        List<Tache> taches = null;
+
+        if (responseWrapper.getStatusCode() == 200) {
+            Gson gson = new GsonBuilder()
+                    .registerTypeAdapter(Instant.class, new InstantTypeAdapter())
+                    .create();
+            JsonElement responseBody = JsonParser.parseString(responseWrapper.getBody().toString());
+            TacheResponse tacheResponse = gson.fromJson(responseBody, TacheResponse.class);
+            taches = tacheResponse.getTache();
+        }
+        return taches;
     }
 
     private JsonNode parseJson(String responseBody) {

@@ -1,26 +1,27 @@
 package com.ecaf.ecafclientjava.entites;
 
+import java.time.Instant;
 import java.time.LocalDate;
 
 public class Evenement {
-    private LocalDate date;
-    private String titre;
+    private Instant date;
+    private String nom;
     private String description;
     private String lieu;
 
-    public Evenement(String titre, LocalDate date, String description, String lieu) {
-        this.titre = titre;
+    public Evenement(String nom, Instant date, String description, String lieu) {
+        this.nom = nom;
         this.date = date;
         this.description = description;
         this.lieu = lieu;
     }
 
-    public LocalDate getDate() {
+    public Instant getDate() {
         return date;
     }
 
-    public String getTitre() {
-        return titre;
+    public String getNom() {
+        return nom;
     }
 
     public String getDescription() {

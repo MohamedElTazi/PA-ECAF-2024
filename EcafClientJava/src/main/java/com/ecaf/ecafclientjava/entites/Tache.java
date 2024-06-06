@@ -1,19 +1,20 @@
 package com.ecaf.ecafclientjava.entites;
 
+import java.time.Instant;
 import java.time.LocalDate;
 
 public class Tache {
     private int tacheID;
     private String description;
-    private LocalDate dateDebut;
-    private LocalDate dateFin;
+    private Instant dateDebut;
+    private Instant dateFin;
     private String statut;
 
     // Associations
     private User responsable;
 
     // Constructeur
-    public Tache(int tacheID, String description, LocalDate dateDebut, LocalDate dateFin, String statut, User responsable) {
+    public Tache(int tacheID, String description, Instant dateDebut, Instant dateFin, String statut, User responsable) {
         this.tacheID = tacheID;
         this.description = description;
         this.dateDebut = dateDebut;
@@ -39,19 +40,19 @@ public class Tache {
         this.description = description;
     }
 
-    public LocalDate getDateDebut() {
+    public Instant getDateDebut() {
         return dateDebut;
     }
 
-    public void setDateDebut(LocalDate dateDebut) {
+    public void setDateDebut(Instant dateDebut) {
         this.dateDebut = dateDebut;
     }
 
-    public LocalDate getDateFin() {
+    public Instant getDateFin() {
         return dateFin;
     }
 
-    public void setDateFin(LocalDate dateFin) {
+    public void setDateFin(Instant dateFin) {
         this.dateFin = dateFin;
     }
 
