@@ -46,7 +46,7 @@ public class Main extends Application {
     private VueGestionTache vueGestionTache;
     private VuePlanificationTache vuePlanificationTache;
 
-    private static final String CURRENT_VERSION = "version_1.0.0";
+    private static final String CURRENT_VERSION = "version_1.0.1";
     private static final String UPDATE_URL_TEMPLATE = "https://github.com/username/repo/releases/download/%s/MyApp.jar";
 
     @Override
@@ -54,7 +54,7 @@ public class Main extends Application {
         checkForUpdates();
 
         // Code existant pour configurer l'application JavaFX
-        Text text = new Text("ECAF Client");
+        Text text = new Text("ECAF ClientJAR");
         text.setFont(new Font("Arial", 24));
         root.setPadding(new Insets(10, 10, 10, 10));
         root.setId("rootPane");
