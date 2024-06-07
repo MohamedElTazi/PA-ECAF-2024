@@ -29,6 +29,8 @@ import java.io.BufferedInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.time.Instant;
 import java.util.Optional;
 public class Main extends Application {
@@ -47,14 +49,15 @@ public class Main extends Application {
     private VuePlanificationTache vuePlanificationTache;
 
     private static final String CURRENT_VERSION = "version_1.0.1";
-    private static final String UPDATE_URL_TEMPLATE = "https://github.com/username/repo/releases/download/%s/MyApp.jar";
-
+    private static final String UPDATE_URL_TEMPLATE = "https://github.com/MohamedElTazi/PA-ECAF-2024/blob/main/EcafClientJava/out/artifacts/ecafclientjava_jar/ecafclientjava.jar";
+    private static final String TEMP_DOWNLOAD_PATH = "update/ECAFClient_new.exe"; // Chemin pour télécharger la nouvelle version
+    private static final String EXE_PATH = "ECAFClient.exe";
     @Override
     public void start(Stage stage) throws IOException, InterruptedException {
         checkForUpdates();
 
         // Code existant pour configurer l'application JavaFX
-        Text text = new Text("ECAF ClientJAR");
+        Text text = new Text("ECAF Client2");
         text.setFont(new Font("Arial", 24));
         root.setPadding(new Insets(10, 10, 10, 10));
         root.setId("rootPane");
@@ -355,7 +358,8 @@ public class Main extends Application {
                 System.out.println("Mise à jour téléchargée. Redémarrage de l'application...");
 
                 // Remplacer l'ancien JAR par le nouveau et redémarrer l'application
-                Runtime.getRuntime().exec("java -jar update.jar");
+                Runtime.getRuntime().exec("java -jar ecafclientjava2.jar");
+
                 System.exit(0);
             } else {
                 System.out.println("L'application est à jour.");
@@ -368,7 +372,7 @@ public class Main extends Application {
     private void downloadUpdate(String updateUrl) throws IOException {
         URL url = new URL(updateUrl);
         try (BufferedInputStream in = new BufferedInputStream(url.openStream());
-             FileOutputStream fileOutputStream = new FileOutputStream("update.jar")) {
+             FileOutputStream fileOutputStream = new FileOutputStream("ecafclientjava2.jar")) {
             byte[] dataBuffer = new byte[1024];
             int bytesRead;
             while ((bytesRead = in.read(dataBuffer, 0, 1024)) != -1) {
@@ -377,7 +381,27 @@ public class Main extends Application {
         }
     }
 
+    /*private void replaceAndRestart() throws IOException {
+        // Créer un script batch pour remplacer l'exécutable et redémarrer l'application
+        String scriptContent = String.join(System.lineSeparator(),
+                "timeout /t 2", // Attendre 2 secondes pour que l'application se termine
+                "move /Y \"" + TEMP_DOWNLOAD_PATH + "\" \"" + EXE_PATH + "\"",
+                "start \"\" \"" + EXE_PATH + "\"",
+                "exit"
+        );
+
+        // Écrire le script dans un fichier temporaire
+        Files.write(Paths.get("update_script.bat"), scriptContent.getBytes());
+
+        // Exécuter le script batch
+        Runtime.getRuntime().exec("cmd /c start update_script.bat");
+
+        // Fermer l'application actuelle
+        Platform.exit();
+    }*/
+
     public static void main(String[] args) {
         Application.launch(Main.class, args);
+        //launch(args);
     }
 }
