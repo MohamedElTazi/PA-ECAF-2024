@@ -48,9 +48,6 @@ public class Main extends Application {
     private VuePlanificationTache vuePlanificationTache;
 
     private static final String CURRENT_VERSION = "version_1.0.1";
-    private static final String UPDATE_URL_TEMPLATE = "https://github.com/R-Mehdi94/ECAF-JAR/blob/main/ecafclientjava.jar";
-    private static final String TEMP_DOWNLOAD_PATH = "update/ECAFClient_new.exe"; // Chemin pour télécharger la nouvelle version
-    private static final String EXE_PATH = "ECAFClient.exe";
     @Override
     public void start(Stage stage) throws IOException, InterruptedException {
         checkForUpdates();
@@ -288,10 +285,7 @@ public class Main extends Application {
         });
 
         stage.setOnCloseRequest(event -> {
-            // Consommer l'événement pour empêcher la fermeture de la fenêtre
             event.consume();
-
-            // Afficher une alerte de confirmation
             Alert alertQuitter = new Alert(Alert.AlertType.CONFIRMATION);
             alertQuitter.setTitle("Quitter");
             alertQuitter.setHeaderText("Demande de confirmation");
