@@ -48,7 +48,7 @@ public class Main extends Application {
     private VueGestionTache vueGestionTache;
     private VuePlanificationTache vuePlanificationTache;
 
-    private static final String CURRENT_VERSION = "version_1.0.0";
+    private static final String CURRENT_VERSION = "version_1.0.1";
     private static final String UPDATE_URL_TEMPLATE = "https://github.com/MohamedElTazi/PA-ECAF-2024/blob/main/EcafClientJava/out/artifacts/ecafclientjava_jar/ecafclientjava.jar";
     private static final String TEMP_DOWNLOAD_PATH = "update/ECAFClient_new.exe"; // Chemin pour télécharger la nouvelle version
     private static final String EXE_PATH = "ECAFClient.exe";
@@ -57,7 +57,7 @@ public class Main extends Application {
         checkForUpdates();
 
         // Code existant pour configurer l'application JavaFX
-        Text text = new Text("ECAF Client");
+        Text text = new Text("ECAF Client2");
         text.setFont(new Font("Arial", 24));
         root.setPadding(new Insets(10, 10, 10, 10));
         root.setId("rootPane");
@@ -360,7 +360,6 @@ public class Main extends Application {
                 // Remplacer l'ancien JAR par le nouveau et redémarrer l'application
                 Runtime.getRuntime().exec("java -jar update.jar");
 
-                replaceAndRestart();
                 System.exit(0);
             } else {
                 System.out.println("L'application est à jour.");
@@ -382,7 +381,7 @@ public class Main extends Application {
         }
     }
 
-    private void replaceAndRestart() throws IOException {
+    /*private void replaceAndRestart() throws IOException {
         // Créer un script batch pour remplacer l'exécutable et redémarrer l'application
         String scriptContent = String.join(System.lineSeparator(),
                 "timeout /t 2", // Attendre 2 secondes pour que l'application se termine
@@ -399,9 +398,10 @@ public class Main extends Application {
 
         // Fermer l'application actuelle
         Platform.exit();
-    }
+    }*/
 
     public static void main(String[] args) {
         Application.launch(Main.class, args);
+        //launch(args);
     }
 }
