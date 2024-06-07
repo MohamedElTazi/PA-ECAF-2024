@@ -8,12 +8,12 @@ import com.ecaf.ecafclientjava.technique.Theme;
 import com.ecaf.ecafclientjava.vue.*;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import javafx.animation.PauseTransition;
+import javafx.animation.SequentialTransition;
 import javafx.application.Application;
 import javafx.application.Platform;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
+
 import javafx.geometry.Insets;
-import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.input.KeyCombination;
@@ -22,17 +22,16 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
-import javafx.stage.WindowEvent;
+import javafx.util.Duration;
 import javafx.util.Pair;
 
-import java.io.BufferedInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Paths;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
+
 import java.time.Instant;
 import java.util.Optional;
+
 public class Main extends Application {
 
     private final MenuItem itemConnecter = new MenuItem("Se connecter");
@@ -49,14 +48,12 @@ public class Main extends Application {
     private VuePlanificationTache vuePlanificationTache;
 
     private static final String CURRENT_VERSION = "version_1.0.1";
-    private static final String UPDATE_URL_TEMPLATE = "https://github.com/MohamedElTazi/PA-ECAF-2024/blob/main/EcafClientJava/out/artifacts/ecafclientjava_jar/ecafclientjava.jar";
+    private static final String UPDATE_URL_TEMPLATE = "https://github.com/R-Mehdi94/ECAF-JAR/blob/main/ecafclientjava.jar";
     private static final String TEMP_DOWNLOAD_PATH = "update/ECAFClient_new.exe"; // Chemin pour télécharger la nouvelle version
     private static final String EXE_PATH = "ECAFClient.exe";
     @Override
     public void start(Stage stage) throws IOException, InterruptedException {
         checkForUpdates();
-
-        // Code existant pour configurer l'application JavaFX
         Text text = new Text("ECAF Client2");
         text.setFont(new Font("Arial", 24));
         root.setPadding(new Insets(10, 10, 10, 10));
@@ -346,59 +343,47 @@ public class Main extends Application {
             JsonNode fileVersionNode = jsonResponse.get("fileVersion");
             String fileVersion = fileVersionNode.asText();
 
-            System.out.println("Version actuelle : " + CURRENT_VERSION);
-            System.out.println("Version disponible : " + fileVersion);
+            SequentialTransition sequentialTransition = new SequentialTransition();
+
 
             if (!CURRENT_VERSION.equals(fileVersion)) {
-                System.out.println("Nouvelle version disponible. Téléchargement en cours...");
-                String updateUrl = String.format(UPDATE_URL_TEMPLATE, fileVersion);
+                sequentialTransition.getChildren().addAll(
+                        createAlertWithDelay(AlertType.INFORMATION, "Mise à jour disponible", "Nouvelle version disponible. Téléchargement en cours..."),
+                        new PauseTransition(Duration.seconds(1)) // Ajoute un délai avant de lancer le téléchargement
+                );
 
-                // Télécharger la mise à jour
-                downloadUpdate(updateUrl);
-                System.out.println("Mise à jour téléchargée. Redémarrage de l'application...");
-
-                // Remplacer l'ancien JAR par le nouveau et redémarrer l'application
-                Runtime.getRuntime().exec("java -jar ecafclientjava2.jar");
-
-                System.exit(0);
-            } else {
-                System.out.println("L'application est à jour.");
+                sequentialTransition.setOnFinished(event -> {
+                    try {
+                        Runtime.getRuntime().exec("bash update.sh");
+                        Platform.exit();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                });
             }
+
+            sequentialTransition.play();
         } catch (Exception e) {
             e.printStackTrace();
+            showAlert(AlertType.ERROR, "Erreur", "Une erreur est survenue lors de la vérification ou de la mise à jour : " + e.getMessage());
         }
     }
 
-    private void downloadUpdate(String updateUrl) throws IOException {
-        URL url = new URL(updateUrl);
-        try (BufferedInputStream in = new BufferedInputStream(url.openStream());
-             FileOutputStream fileOutputStream = new FileOutputStream("ecafclientjava2.jar")) {
-            byte[] dataBuffer = new byte[1024];
-            int bytesRead;
-            while ((bytesRead = in.read(dataBuffer, 0, 1024)) != -1) {
-                fileOutputStream.write(dataBuffer, 0, bytesRead);
-            }
-        }
+    private PauseTransition createAlertWithDelay(AlertType alertType, String title, String message) {
+        PauseTransition pause = new PauseTransition(Duration.seconds(2));
+        pause.setOnFinished(event -> showAlert(alertType, title, message));
+        return pause;
     }
 
-    /*private void replaceAndRestart() throws IOException {
-        // Créer un script batch pour remplacer l'exécutable et redémarrer l'application
-        String scriptContent = String.join(System.lineSeparator(),
-                "timeout /t 2", // Attendre 2 secondes pour que l'application se termine
-                "move /Y \"" + TEMP_DOWNLOAD_PATH + "\" \"" + EXE_PATH + "\"",
-                "start \"\" \"" + EXE_PATH + "\"",
-                "exit"
-        );
-
-        // Écrire le script dans un fichier temporaire
-        Files.write(Paths.get("update_script.bat"), scriptContent.getBytes());
-
-        // Exécuter le script batch
-        Runtime.getRuntime().exec("cmd /c start update_script.bat");
-
-        // Fermer l'application actuelle
-        Platform.exit();
-    }*/
+    private void showAlert(AlertType alertType, String title, String message) {
+        Platform.runLater(() -> {
+            Alert alert = new Alert(alertType);
+            alert.setTitle(title);
+            alert.setHeaderText(null);
+            alert.setContentText(message);
+            alert.showAndWait();
+        });
+    }
 
     public static void main(String[] args) {
         Application.launch(Main.class, args);
