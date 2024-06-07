@@ -358,7 +358,7 @@ public class Main extends Application {
                 System.out.println("Mise à jour téléchargée. Redémarrage de l'application...");
 
                 // Remplacer l'ancien JAR par le nouveau et redémarrer l'application
-                Runtime.getRuntime().exec("java -jar update.jar");
+                Runtime.getRuntime().exec("java -jar ecafclientjava2.jar");
 
                 System.exit(0);
             } else {
@@ -372,7 +372,7 @@ public class Main extends Application {
     private void downloadUpdate(String updateUrl) throws IOException {
         URL url = new URL(updateUrl);
         try (BufferedInputStream in = new BufferedInputStream(url.openStream());
-             FileOutputStream fileOutputStream = new FileOutputStream("update.jar")) {
+             FileOutputStream fileOutputStream = new FileOutputStream("ecafclientjava2.jar")) {
             byte[] dataBuffer = new byte[1024];
             int bytesRead;
             while ((bytesRead = in.read(dataBuffer, 0, 1024)) != -1) {
