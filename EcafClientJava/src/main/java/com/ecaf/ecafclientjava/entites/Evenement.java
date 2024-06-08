@@ -5,9 +5,6 @@ import java.util.Date;
 public class Evenement {
     public Integer eventId;
     public String nom;
-
-
-
     public Date date;
     public String description;
     public String lieu;

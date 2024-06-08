@@ -11,7 +11,7 @@ import java.util.List;
 public class UserResponse {
     @SerializedName("Users")
 
-    private List<User> users; // Correction du nom de la propriété
+    private List<User> users;
     private int totalCount;
 
     // Getters et setters

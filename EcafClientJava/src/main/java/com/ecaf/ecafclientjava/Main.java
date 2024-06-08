@@ -47,11 +47,11 @@ public class Main extends Application {
     private VueGestionTache vueGestionTache;
     private VuePlanificationTache vuePlanificationTache;
 
-    private static final String CURRENT_VERSION = "version_1.0.1";
+    private static final String CURRENT_VERSION = "version_1.0.0";
     @Override
     public void start(Stage stage) throws IOException, InterruptedException {
         checkForUpdates();
-        Text text = new Text("ECAF Client2");
+        Text text = new Text("ECAF Client");
         text.setFont(new Font("Arial", 24));
         root.setPadding(new Insets(10, 10, 10, 10));
         root.setId("rootPane");
