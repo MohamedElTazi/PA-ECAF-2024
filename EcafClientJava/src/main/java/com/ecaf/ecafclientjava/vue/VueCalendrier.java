@@ -29,9 +29,9 @@ public class VueCalendrier extends VBox {
     private final ListView<String> eventListView;
 
     public VueCalendrier(List<Evenement> evenements, List<Tache> taches, List<AG> ags) {
-        this.evenements = evenements != null ? evenements : new ArrayList<>();
-        this.taches = taches != null ? taches : new ArrayList<>();
-        this.ags = ags != null ? ags : new ArrayList<>();
+        this.evenements = evenements;
+        this.taches = taches;
+        this.ags = ags;
         currentYearMonth = YearMonth.now();
 
         // Header with navigation and month/year label
