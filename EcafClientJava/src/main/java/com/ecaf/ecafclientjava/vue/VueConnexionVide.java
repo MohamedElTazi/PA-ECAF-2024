@@ -1,5 +1,6 @@
 package com.ecaf.ecafclientjava.vue;
 
+import com.ecaf.ecafclientjava.technique.Theme;
 import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Dialog;
@@ -17,13 +18,18 @@ public class VueConnexionVide extends Dialog {
         this.setHeaderText(saisie);
 
         VBox vbSaisies = new VBox();
+        vbSaisies.getStyleClass().add("vbox");
 
         Label label = new Label("Votre identifiant ou votre mot de passe est manquant");
+        label.getStyleClass().add("label");
 
         vbSaisies.getChildren().add(label);
 
 
+        this.getDialogPane().getStylesheets().add(getClass().getResource(Theme.themeVueConnexionEchoueVide).toExternalForm());
+        this.getDialogPane().getStyleClass().add("dialog-pane");
 
+        this.getDialogPane().setContent(vbSaisies);
         this.getDialogPane().setContent(vbSaisies);
 
         ButtonType FERMER = new ButtonType(fermer, ButtonBar.ButtonData.CANCEL_CLOSE);

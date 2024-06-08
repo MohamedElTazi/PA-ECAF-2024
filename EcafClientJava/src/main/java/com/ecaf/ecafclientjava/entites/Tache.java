@@ -4,7 +4,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 
 public class Tache {
-    private int tacheID;
+    private int id;
     private String description;
     private Instant dateDebut;
     private Instant dateFin;
@@ -15,7 +15,7 @@ public class Tache {
 
     // Constructeur
     public Tache(int tacheID, String description, Instant dateDebut, Instant dateFin, String statut, User responsable) {
-        this.tacheID = tacheID;
+        this.id = tacheID;
         this.description = description;
         this.dateDebut = dateDebut;
         this.dateFin = dateFin;
@@ -25,11 +25,11 @@ public class Tache {
 
     // Getters et setters
     public int getTacheID() {
-        return tacheID;
+        return id;
     }
 
     public void setTacheID(int tacheID) {
-        this.tacheID = tacheID;
+        this.id = tacheID;
     }
 
     public String getDescription() {
@@ -75,7 +75,7 @@ public class Tache {
     @Override
     public String toString() {
         return "Tache{" +
-                "tacheID=" + tacheID +
+                "tacheID=" + id +
                 ", description='" + description + '\'' +
                 ", dateDebut=" + dateDebut +
                 ", dateFin=" + dateFin +
@@ -83,4 +83,6 @@ public class Tache {
                 ", responsable=" + responsable +
                 '}';
     }
+
+
 }

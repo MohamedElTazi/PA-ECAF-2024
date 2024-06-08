@@ -1,7 +1,6 @@
 package com.ecaf.ecafclientjava.technique;
 
 import com.ecaf.ecafclientjava.entites.Evenement;
-import com.ecaf.ecafclientjava.entites.Ressource;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.google.gson.annotations.SerializedName;
 

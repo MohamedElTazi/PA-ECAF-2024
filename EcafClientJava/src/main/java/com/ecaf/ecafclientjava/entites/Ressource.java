@@ -1,31 +1,37 @@
 package com.ecaf.ecafclientjava.entites;
 
 public class Ressource {
-    private int ressourceID;
+    private int id;
     private String nom;
     private String type;
-    private String statut;
-
-
-
+    private int quantite;
     private String emplacement;
 
-    // Constructeur
-    public Ressource(int ressourceID, String nom, String type, String statut, String emplacement) {
-        this.ressourceID = ressourceID;
+
+
+    public Ressource(int ressourceID, String nom, String type, int quantite, String emplacement) {
+        this.id = ressourceID;
         this.nom = nom;
         this.type = type;
-        this.statut = statut;
+        this.quantite = quantite;
         this.emplacement = emplacement;
+    }
+
+    public int getQuantite() {
+        return quantite;
+    }
+
+    public void setQuantite(int quantite) {
+        this.quantite = quantite;
     }
 
     // Getters et setters
     public int getRessourceID() {
-        return ressourceID;
+        return id;
     }
 
     public void setRessourceID(int ressourceID) {
-        this.ressourceID = ressourceID;
+        this.id = ressourceID;
     }
 
     public String getNom() {
@@ -44,13 +50,7 @@ public class Ressource {
         this.type = type;
     }
 
-    public String getStatut() {
-        return statut;
-    }
 
-    public void setStatut(String statut) {
-        this.statut = statut;
-    }
 
     public String getEmplacement() {
         return emplacement;
@@ -63,10 +63,10 @@ public class Ressource {
     @Override
     public String toString() {
         return "Ressource{" +
-                "ressourceID=" + ressourceID +
+                "ressourceID=" + id +
                 ", nom='" + nom + '\'' +
                 ", type='" + type + '\'' +
-                ", statut='" + statut + '\'' +
+                ", quantite=" + quantite +
                 ", emplacement='" + emplacement + '\'' +
                 '}';
     }

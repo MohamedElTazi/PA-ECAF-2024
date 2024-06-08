@@ -1,43 +1,53 @@
 package com.ecaf.ecafclientjava.entites;
 
 
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+import java.time.Instant;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class User {
-    private int userID;
+    private int id;
     private String nom;
     private String prenom;
     private String email;
     private String motDePasse;
     private String role;
     private boolean estBenevole;
-    private LocalDate dateInscription;
+    private Instant dateInscription;
+    private String token;
+    private boolean estEnLigne; // Ajoutez cet attribut
 
-    // Associations
-    private List<Reservation> reservations;
-    private List<Tache> tachesResponsable;
+
+    // Constructeur par défaut
+    public User() {
+    }
 
     // Constructeur
-    public User(int userID, String nom, String prenom, String email, String motDePasse, String role, boolean estBenevole, LocalDate dateInscription) {
-        this.userID = userID;
+    public User(int id, String nom, String prenom, String email, String motDePasse, String role, Instant dateInscription, boolean estBenevole, String token, boolean estEnLigne) {
+        this.id = id;
         this.nom = nom;
         this.prenom = prenom;
         this.email = email;
         this.motDePasse = motDePasse;
         this.role = role;
-        this.estBenevole = estBenevole;
         this.dateInscription = dateInscription;
+        this.estBenevole = estBenevole;
+        this.token = token;
+        this.estEnLigne = estEnLigne;
     }
 
     // Getters et setters
-    public int getUserID() {
-        return userID;
+    public int getId() {
+        return id;
     }
 
-    public void setUserID(int userID) {
-        this.userID = userID;
+    public void setId(int id) {
+        this.id = id;
     }
 
     public String getNom() {
@@ -88,29 +98,43 @@ public class User {
         this.estBenevole = estBenevole;
     }
 
-    public LocalDate getDateInscription() {
+    public Instant getDateInscription() {
         return dateInscription;
     }
 
-    public void setDateInscription(LocalDate dateInscription) {
+    public void setDateInscription(Instant dateInscription) {
         this.dateInscription = dateInscription;
     }
 
-    public List<Reservation> getReservations() {
-        return reservations;
+    public String getToken() {
+        return token;
     }
 
-    public void setReservations(List<Reservation> reservations) {
-        this.reservations = reservations;
+    public void setToken(String token) {
+        this.token = token;
     }
 
-    public List<Tache> getTachesResponsable() {
-        return tachesResponsable;
+    public boolean isEstEnLigne() {
+        return estEnLigne;
     }
 
-    public void setTachesResponsable(List<Tache> tachesResponsable) {
-        this.tachesResponsable = tachesResponsable;
+    public void setEstEnLigne(boolean estEnLigne) {
+        this.estEnLigne = estEnLigne;
     }
 
-
+    @Override
+    public String toString() {
+        return "User{" +
+                "id=" + id +
+                ", nom='" + nom + '\'' +
+                ", prenom='" + prenom + '\'' +
+                ", email='" + email + '\'' +
+                ", motDePasse='" + motDePasse + '\'' +
+                ", role='" + role + '\'' +
+                ", estBenevole=" + estBenevole +
+                ", dateInscription=" + dateInscription +
+                ", token='" + token + '\'' +
+                ", estEnLigne=" + estEnLigne +
+                '}';
+    }
 }

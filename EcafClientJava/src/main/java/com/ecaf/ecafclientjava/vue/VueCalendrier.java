@@ -1,7 +1,9 @@
 package com.ecaf.ecafclientjava.vue;
 
+import com.ecaf.ecafclientjava.entites.AG;
 import com.ecaf.ecafclientjava.entites.Evenement;
 import com.ecaf.ecafclientjava.entites.Tache;
+import com.ecaf.ecafclientjava.technique.Theme;
 import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
@@ -11,6 +13,7 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.stream.Collectors;
@@ -22,11 +25,13 @@ public class VueCalendrier extends VBox {
     private final Label monthYearLabel;
     private final List<Evenement> evenements;
     private final List<Tache> taches;
+    private final List<AG> ags;
     private final ListView<String> eventListView;
 
-    public VueCalendrier(List<Evenement> evenements, List<Tache> taches) {
-        this.evenements = evenements;
-        this.taches = taches;
+    public VueCalendrier(List<Evenement> evenements, List<Tache> taches, List<AG> ags) {
+        this.evenements = evenements != null ? evenements : new ArrayList<>();
+        this.taches = taches != null ? taches : new ArrayList<>();
+        this.ags = ags != null ? ags : new ArrayList<>();
         currentYearMonth = YearMonth.now();
 
         // Header with navigation and month/year label
@@ -67,6 +72,7 @@ public class VueCalendrier extends VBox {
         updateCalendar();
 
         this.getChildren().addAll(header, calendarGrid, eventListView);
+        applyCurrentTheme();
     }
 
     private void updateCalendar() {
@@ -98,10 +104,9 @@ public class VueCalendrier extends VBox {
             dayButton.setMaxWidth(Double.MAX_VALUE);
             dayButton.setMaxHeight(Double.MAX_VALUE);
 
-            if (hasEvent(date) || hasTask(date)) {
+            if (hasEvent(date) || hasTask(date) || hasAg(date)) {
                 dayButton.setStyle("-fx-background-color: lightgreen;");
             }
-
             dayButton.setOnAction(e -> handleDayClick(date));
 
             int col = (dayOfWeek + day - 1) % 7;
@@ -118,11 +123,15 @@ public class VueCalendrier extends VBox {
         return taches.stream()
                 .anyMatch(task -> LocalDate.ofInstant(task.getDateDebut(), ZoneId.systemDefault()).equals(date));
     }
+    private boolean hasAg(LocalDate date) {
+        return ags.stream()
+                .anyMatch(ags -> LocalDate.ofInstant(ags.getDate(), ZoneId.systemDefault()).equals(date));
+    }
 
     private void handleDayClick(LocalDate date) {
         List<String> eventDetails = evenements.stream()
                 .filter(event -> LocalDate.ofInstant(event.getDate(), ZoneId.systemDefault()).equals(date))
-                .map(event -> event.getNom() + " : " + event.getDescription())
+                .map(event -> "Événement : " + event.getNom() + " : " + event.getDescription())
                 .collect(Collectors.toList());
 
         List<String> taskDetails = taches.stream()
@@ -130,12 +139,24 @@ public class VueCalendrier extends VBox {
                 .map(task -> "Tâche : " + task.getDescription())
                 .collect(Collectors.toList());
 
+        List<String> agDetails = ags.stream()
+                .filter(ag -> LocalDate.ofInstant(ag.getDate(), ZoneId.systemDefault()).equals(date))
+                .map(ag -> "AG : " + ag.getDescription())
+                .collect(Collectors.toList());
+
         eventListView.getItems().setAll(eventDetails);
         eventListView.getItems().addAll(taskDetails);
+        eventListView.getItems().addAll(agDetails);
     }
 
     private void changeMonth(int months) {
         currentYearMonth = currentYearMonth.plusMonths(months);
         updateCalendar();
+    }
+
+    public void applyCurrentTheme() {
+        this.getStylesheets().clear();
+        this.getStylesheets().add(getClass().getResource(Theme.themeVueCalendrier).toExternalForm());
+        this.setStyle("-fx-background-color: " + Theme.backgroudColorMain + ";");
     }
 }

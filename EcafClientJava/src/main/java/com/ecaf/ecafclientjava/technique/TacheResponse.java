@@ -1,10 +1,13 @@
 package com.ecaf.ecafclientjava.technique;
 
 import com.ecaf.ecafclientjava.entites.Tache;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.google.gson.annotations.SerializedName;
 
 import java.util.List;
 
+
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class TacheResponse {
     @SerializedName("Taches")
 
@@ -12,11 +15,11 @@ public class TacheResponse {
     private int totalCount;
 
     // Getters et setters
-    public List<Tache> getTache() {
+    public List<Tache> getTaches() {
         return taches;
     }
 
-    public void setTache(List<Tache> taches) {
+    public void setTaches(List<Tache> taches) {
         this.taches = taches;
     }
 

@@ -1,11 +1,12 @@
 package com.ecaf.ecafclientjava.entites;
 
+import java.time.Instant;
 import java.time.LocalDate;
 
 public class Reservation {
     private int reservationID;
-    private LocalDate dateDebut;
-    private LocalDate dateFin;
+    private Instant dateDebut;
+    private Instant dateFin;
     private String description;
 
     // Association
@@ -16,7 +17,7 @@ public class Reservation {
     private User utilisateur;
 
     // Constructeur
-    public Reservation(int reservationID, LocalDate dateDebut, LocalDate dateFin, String description, Ressource ressource, User utilisateur) {
+    public Reservation(int reservationID, Instant dateDebut, Instant dateFin, String description, Ressource ressource, User utilisateur) {
         this.reservationID = reservationID;
         this.dateDebut = dateDebut;
         this.dateFin = dateFin;
@@ -34,19 +35,19 @@ public class Reservation {
         this.reservationID = reservationID;
     }
 
-    public LocalDate getDateDebut() {
+    public Instant getDateDebut() {
         return dateDebut;
     }
 
-    public void setDateDebut(LocalDate dateDebut) {
+    public void setDateDebut(Instant dateDebut) {
         this.dateDebut = dateDebut;
     }
 
-    public LocalDate getDateFin() {
+    public Instant getDateFin() {
         return dateFin;
     }
 
-    public void setDateFin(LocalDate dateFin) {
+    public void setDateFin(Instant dateFin) {
         this.dateFin = dateFin;
     }
 
