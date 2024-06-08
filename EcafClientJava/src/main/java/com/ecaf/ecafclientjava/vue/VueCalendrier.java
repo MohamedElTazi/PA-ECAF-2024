@@ -72,7 +72,6 @@ public class VueCalendrier extends VBox {
         updateCalendar();
 
         this.getChildren().addAll(header, calendarGrid, eventListView);
-        applyCurrentTheme();
     }
 
     private void updateCalendar() {
@@ -154,9 +153,4 @@ public class VueCalendrier extends VBox {
         updateCalendar();
     }
 
-    public void applyCurrentTheme() {
-        this.getStylesheets().clear();
-        this.getStylesheets().add(getClass().getResource(Theme.themeVueCalendrier).toExternalForm());
-        this.setStyle("-fx-background-color: " + Theme.backgroudColorMain + ";");
-    }
 }

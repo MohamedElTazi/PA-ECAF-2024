@@ -10,9 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-import com.ecaf.ecafclientjava.entites.Ressource;
-import com.ecaf.ecafclientjava.entites.Tache;
-import com.ecaf.ecafclientjava.entites.User;
+import com.ecaf.ecafclientjava.entites.*;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -142,6 +140,37 @@ public class HttpService {
             ;
         }
         return ressources;
+    }
+
+    public List<Evenement> getAllEvenement() throws IOException, InterruptedException {
+        String endpoint = "evenements"; // L'URL de votre endpoint pour récupérer les tâches
+        HttpResponseWrapper responseWrapper = sendGetRequest(endpoint);
+        List<Evenement> evenements = null;
+        if (responseWrapper.getStatusCode() == 200) {
+            Gson gson = new GsonBuilder()
+                    .registerTypeAdapter(Instant.class, new InstantTypeAdapter())
+                    .create();
+            String responseBody = responseWrapper.getBody().toString(); // Convert JsonNode to String
+            EventResponse eventResponse = gson.fromJson(responseBody, EventResponse.class);
+            evenements = eventResponse.getEvent();
+            ;
+        }
+        return evenements;
+    }
+    public List<AG> getAllAG() throws IOException, InterruptedException {
+        String endpoint = "ags"; // L'URL de votre endpoint pour récupérer les tâches
+        HttpResponseWrapper responseWrapper = sendGetRequest(endpoint);
+        List<AG> ags = null;
+        if (responseWrapper.getStatusCode() == 200) {
+            Gson gson = new GsonBuilder()
+                    .registerTypeAdapter(Instant.class, new InstantTypeAdapter())
+                    .create();
+            String responseBody = responseWrapper.getBody().toString(); // Convert JsonNode to String
+            AgResponse agResponse = gson.fromJson(responseBody, AgResponse.class);
+            ags = agResponse.getAgs();
+            ;
+        }
+        return ags;
     }
 
     private JsonNode parseJson(String responseBody) {

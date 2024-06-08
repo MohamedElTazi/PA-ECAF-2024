@@ -1,5 +1,8 @@
 package com.ecaf.ecafclientjava;
 
+import com.ecaf.ecafclientjava.entites.AG;
+import com.ecaf.ecafclientjava.entites.Evenement;
+import com.ecaf.ecafclientjava.entites.Tache;
 import com.ecaf.ecafclientjava.entites.User;
 import com.ecaf.ecafclientjava.technique.HttpResponseWrapper;
 import com.ecaf.ecafclientjava.technique.HttpService;
@@ -27,6 +30,7 @@ import javafx.util.Pair;
 
 import java.io.IOException;
 import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
 public class Main extends Application {
 
@@ -44,15 +48,21 @@ public class Main extends Application {
     private VuePlanificationTache vuePlanificationTache;
 
     @Override
-    public void start(Stage stage) throws IOException {
+    public void start(Stage stage) throws IOException, InterruptedException {
         Text text = new Text("ECAF Client");
         text.setFont(new Font("Arial", 24));
         root.setPadding(new Insets(10, 10, 10, 10));
         root.setId("rootPane");
+        List<Evenement> evenements = httpService.getAllEvenement();
+        List<Tache> taches = httpService.getAllTaches();
+        List<AG> ags = httpService.getAllAG();
+
+
+        VueCalendrier vueCalendrier = new VueCalendrier(evenements, taches, ags);
 
         StackPane centerPane = new StackPane(text);
         centerPane.setPadding(new Insets(20));
-        root.setCenter(centerPane);
+        root.setCenter(vueCalendrier);
 
         MenuBar barreMenus = new MenuBar();
 
@@ -166,8 +176,8 @@ public class Main extends Application {
                     Pair<String, String> result = reponse.get();
                     if (!result.getKey().isEmpty() && !result.getValue().isEmpty()) {
                         try {
-                            String username = "alice.martin@email.com";
-                            String password = "motdepasse2";
+                            String username = "jean.dupont@email.com";
+                            String password = "$2b$10$JuqVnm5ov5EBsi158eE4FOJFVXjnkOCqrc5k2s87M.ya2dwOTS.wG";
                             String requestBody = "{\"email\":\"" + username + "\", \"motDePasse\":\"" + password + "\"}";
 
                             HttpResponseWrapper responseWrapper = httpService.sendPostRequest("auth/login", requestBody);

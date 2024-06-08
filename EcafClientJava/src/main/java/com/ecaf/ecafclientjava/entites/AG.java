@@ -3,7 +3,7 @@ package com.ecaf.ecafclientjava.entites;
 import java.time.Instant;
 
 public class AG {
-    private Integer AgId;
+    private Integer id;
     private String nom;
     private Instant date;
     private String description;
@@ -11,7 +11,7 @@ public class AG {
     private Integer quorum;
 
     public AG(Integer AgId, String nom, String description, String type, Instant date, Integer quorum){
-        this.AgId = AgId;
+        this.id = AgId;
         this.nom = nom;
         this.date = date;
         this.description = description;
@@ -20,11 +20,11 @@ public class AG {
     }
 
     public Integer getAgId() {
-        return AgId;
+        return id;
     }
 
     public void setAgId(Integer agId) {
-        AgId = agId;
+        id = agId;
     }
 
     public String getNom() {
