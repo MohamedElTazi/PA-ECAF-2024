@@ -62,7 +62,7 @@ public class Main extends Application {
 
         StackPane centerPane = new StackPane(text);
         centerPane.setPadding(new Insets(20));
-        root.setCenter(vueCalendrier);
+        root.setCenter(centerPane);
 
         MenuBar barreMenus = new MenuBar();
 
@@ -76,8 +76,10 @@ public class Main extends Application {
 
         // Menu Principal
         MenuItem itemMenuPrincipal = new MenuItem("Accueil");
+        MenuItem itemCalendrier = new MenuItem("Calendrier");
         Menu menuPrincipal = new Menu("Menu Principal");
         menuPrincipal.getItems().add(itemMenuPrincipal);
+        menuPrincipal.getItems().add(itemCalendrier);
         barreMenus.getMenus().add(menuPrincipal);
 
         // Menu Ressource
@@ -177,7 +179,7 @@ public class Main extends Application {
                     if (!result.getKey().isEmpty() && !result.getValue().isEmpty()) {
                         try {
                             String username = "jean.dupont@email.com";
-                            String password = "$2b$10$JuqVnm5ov5EBsi158eE4FOJFVXjnkOCqrc5k2s87M.ya2dwOTS.wG";
+                            String password = "motdepasse1";
                             String requestBody = "{\"email\":\"" + username + "\", \"motDePasse\":\"" + password + "\"}";
 
                             HttpResponseWrapper responseWrapper = httpService.sendPostRequest("auth/login", requestBody);
@@ -328,6 +330,15 @@ public class Main extends Application {
                     public void handle(ActionEvent event) {
                         vueMenuPrincipal = new VueMenuPrincipal();
                         root.setCenter(vueMenuPrincipal);
+                    }
+                }
+        );
+        itemCalendrier.setOnAction(
+                new EventHandler<ActionEvent>() {
+                    @Override
+                    public void handle(ActionEvent event) {
+                        VueCalendrier vueCalendrier = new VueCalendrier(evenements, taches, ags);
+                        root.setCenter(vueCalendrier);
                     }
                 }
         );

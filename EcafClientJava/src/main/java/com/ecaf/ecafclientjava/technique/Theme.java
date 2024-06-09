@@ -8,6 +8,7 @@ public class Theme{
     public static String themeAlert = "/com/ecaf/ecafclientjava/css/theme-clair/alert.css";
     public static String themeVueConnexion = "/com/ecaf/ecafclientjava/css/theme-clair/vueConnexion.css";
     public static String themeVueConnexionEchoueVide = "/com/ecaf/ecafclientjava/css/theme-clair/vueConnexionEchoueVide.css";
+    public static String themeVucalendrier = "/com/ecaf/ecafclientjava/css/theme-clair/vueCalendrier.css";
     public static String backgroudColorMain = "#f0f0f0";
     public static String clair = "clair";
     public static String sombre = "sombre";
@@ -33,6 +34,7 @@ public class Theme{
         Theme.themeAlert = "/com/ecaf/ecafclientjava/css/theme-clair/alert.css";
         Theme.themeVueConnexion = "/com/ecaf/ecafclientjava/css/theme-clair/vueConnexion.css";
         Theme.themeVueConnexionEchoueVide = "/com/ecaf/ecafclientjava/css/theme-clair/vueConnexionEchoueVide.css";
+        Theme.themeVucalendrier = "/com/ecaf/ecafclientjava/css/theme-clair/vueCalendrier.css";
         updateSceneStyles(scene);
         updateVisibleElements(scene);
     }

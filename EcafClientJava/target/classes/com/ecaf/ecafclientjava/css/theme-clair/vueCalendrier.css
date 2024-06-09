@@ -1,87 +1,82 @@
-/* Style général de la scène */
-.root {
-    -fx-background-color: #f0f0f0;
-    -fx-padding: 10px;
+body {
+    background-color: #f0f0f0;
+    color: #000;
+    font-family: Arial, sans-serif;
 }
 
-/* Style de l'en-tête */
-.header {
-    -fx-background-color: #ffe680;
-    -fx-padding: 10px;
-    -fx-spacing: 10px;
+.menu-bar {
+    background-color: #f0f0f0;
+    padding: 10px;
+    border-bottom: 2px solid #e6e6e6;
 }
 
-/* Style des boutons de navigation du mois */
-.header .button {
-    -fx-background-color: #ffffff;
-    -fx-text-fill: #000000;
-    -fx-font-size: 14px;
-    -fx-border-radius: 5px;
-    -fx-background-radius: 5px;
-    -fx-padding: 5px 10px;
+.menu-bar .menu-item {
+    display: inline-block;
+    padding: 10px 20px;
+    color: #000;
+    font-weight: bold;
+    cursor: pointer;
 }
 
-.header .button:hover {
-    -fx-background-color: #cccccc;
+.menu-bar .menu-item:hover {
+    background-color: #e6e6e6;
 }
 
-/* Style de l'étiquette du mois/année */
-.header .label {
-    -fx-font-size: 18px;
-    -fx-font-weight: bold;
-    -fx-text-fill: #000000;
+.calendar {
+    width: 100%;
+    margin: 20px auto;
+    border-collapse: collapse;
+    border: 1px solid #e6e6e6;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 
-/* Style de la grille du calendrier */
-.calendar-grid {
-    -fx-padding: 10px;
-    -fx-hgap: 5px;
-    -fx-vgap: 5px;
-    -fx-alignment: center;
+.calendar th {
+    background-color: #f0f0f0;
+    color: #000;
+    padding: 10px;
+    border: 1px solid #e6e6e6;
 }
 
-/* Style des boutons de la grille */
-.calendar-grid .button {
-    -fx-background-color: #ffffff;
-    -fx-border-color: #d3d3d3;
-    -fx-border-width: 1px;
-    -fx-border-radius: 5px;
-    -fx-background-radius: 5px;
-    -fx-font-size: 14px;
-    -fx-pref-width: 100%;
-    -fx-pref-height: 100%;
-    -fx-text-fill: #000000;
+.calendar td {
+    background-color: #fff;
+    color: #000;
+    padding: 15px;
+    border: 1px solid #e6e6e6;
+    text-align: center;
+    cursor: pointer;
 }
 
-.calendar-grid .button:hover {
-    -fx-background-color: #ffeb3b;
+.calendar td:hover {
+    background-color: #e6e6e6;
 }
 
-/* Style des jours de la semaine */
-.calendar-grid .label {
-    -fx-font-size: 14px;
-    -fx-font-weight: bold;
-    -fx-text-fill: #000000;
+.calendar .header {
+    background-color: #f0f0f0;
+    color: #000;
+    padding: 10px 0;
+    font-size: 18px;
+    font-weight: bold;
+    text-align: center;
+    border-bottom: 2px solid #e6e6e6;
 }
 
-/* Style de la liste des événements */
-.event-list {
-    -fx-padding: 10px;
-    -fx-background-color: #ffffff;
-    -fx-border-color: #d3d3d3;
-    -fx-border-width: 1px;
-    -fx-border-radius: 5px;
-    -fx-background-radius: 5px;
+.calendar .button {
+    background-color: #e6e6e6;
+    color: #000;
+    padding: 10px;
+    border: none;
+    cursor: pointer;
 }
 
-.event-list .list-cell {
-    -fx-background-color: #ffffff;
-    -fx-border-color: #d3d3d3;
-    -fx-border-width: 0 0 1px 0;
-    -fx-padding: 5px;
-    -fx-text-fill: #000000;
+.calendar .button:hover {
+    background-color: #ccc;
 }
 
-.event-list .list-cell:hover {
-    -fx-background-color: #f0f0f0;
+.calendar .event {
+    background-color: #d9edf7;
+    color: #31708f;
+    padding: 5px;
+    border-radius: 5px;
+    margin-top: 5px;
+    border: 1px solid #bce8f1;
 }
