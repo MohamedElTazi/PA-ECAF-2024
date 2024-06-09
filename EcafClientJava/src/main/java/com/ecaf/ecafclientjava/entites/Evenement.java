@@ -1,19 +1,17 @@
 package com.ecaf.ecafclientjava.entites;
 
+import java.time.Instant;
 import java.util.Date;
 
 public class Evenement {
-    public Integer eventId;
+    public Integer id;
     public String nom;
-
-
-
-    public Date date;
+    public Instant date;
     public String description;
     public String lieu;
 
-    public Evenement(Integer eventId, String nom, Date date, String description, String lieu) {
-        this.eventId = eventId;
+    public Evenement(Integer eventId, String nom, Instant date, String description, String lieu) {
+        this.id = eventId;
         this.nom = nom;
         this.date = date;
         this.description = description;
@@ -21,11 +19,11 @@ public class Evenement {
     }
 
     public Integer getEventId() {
-        return eventId;
+        return id;
     }
 
     public void setEventId(Integer eventId) {
-        this.eventId = eventId;
+        this.id = eventId;
     }
 
     public String getNom() {
@@ -36,11 +34,11 @@ public class Evenement {
         this.nom = nom;
     }
 
-    public Date getDate() {
+    public Instant getDate() {
         return date;
     }
 
-    public void setDate(Date date) {
+    public void setDate(Instant date) {
         this.date = date;
     }
 
@@ -63,7 +61,7 @@ public class Evenement {
     @Override
     public String toString() {
         return "Evenement{" +
-                "eventId=" + eventId +
+                "eventId=" + id +
                 ", nom='" + nom + '\'' +
                 ", date=" + date +
                 ", description='" + description + '\'' +
