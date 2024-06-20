@@ -17,4 +17,7 @@ module com.ecaf.ecafclientjava {
 
     exports com.ecaf.ecafclientjava;
     exports com.ecaf.ecafclientjava.vue;
+
+    // Exportez le package contenant ThemePlugin
+    exports com.ecaf.ecafclientjava.plugins.theme;
 }

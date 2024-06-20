@@ -157,7 +157,7 @@ public class VueCalendrier extends VBox {
 
     public void applyCurrentTheme() {
         this.getStylesheets().clear();
-        this.getStylesheets().add(getClass().getResource(Theme.themeVucalendrier).toExternalForm());
+        this.getStylesheets().add(getClass().getResource(Theme.themeVueCalendrier).toExternalForm());
         this.setStyle("-fx-background-color: " + Theme.backgroudColorMain + ";");
     }
 

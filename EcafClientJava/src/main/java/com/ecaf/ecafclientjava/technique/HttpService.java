@@ -11,12 +11,10 @@ import java.util.List;
 
 
 import com.ecaf.ecafclientjava.entites.*;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.reflect.TypeToken;
 
 public class HttpService {
 
@@ -35,7 +33,7 @@ public class HttpService {
 
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
         int statusCode = response.statusCode();
-        JsonNode jsonNode = parseJson(response.body());
+        JsonNode jsonNode = parseJson(response.body( ));
 
         return new HttpResponseWrapper(jsonNode, statusCode);
     }

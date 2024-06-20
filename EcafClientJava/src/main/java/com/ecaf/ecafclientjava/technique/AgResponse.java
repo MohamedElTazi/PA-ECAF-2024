@@ -10,7 +10,7 @@ import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AgResponse {
-    @SerializedName("AGs")
+    @SerializedName("Ags")
 
     private List<AG> ags;
     private int totalCount;
