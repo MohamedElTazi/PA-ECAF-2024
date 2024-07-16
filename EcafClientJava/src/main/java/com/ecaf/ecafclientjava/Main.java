@@ -35,6 +35,7 @@ import javafx.scene.control.Alert.AlertType;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -56,7 +57,7 @@ public class Main extends Application {
     private VueAjoutRessource vueAjoutRessource;
     private VueGestionTache vueGestionTache;
     private VuePlanificationTache vuePlanificationTache;
-    private static final String VERSION = "version_1.0.0"; // Changez la version pour vérifier la mise à jour
+    private static final String VERSION = "version_1.0.1"; // Changez la version pour vérifier la mise à jour
     private static final Logger LOGGER = Logger.getLogger(Main.class.getName());
 
 
@@ -177,8 +178,8 @@ public class Main extends Application {
                 Pair<String, String> result = reponse.get();
                 if (!result.getKey().isEmpty() && !result.getValue().isEmpty()) {
                     try {
-                        String username = "alice.martin@email.com";
-                        String password = "motdepasse2";
+                        String username = result.getKey();//"alice.martin@email.com";
+                        String password = result.getValue();//"motdepasse2";
                         String requestBody = "{\"email\":\"" + username + "\", \"motDePasse\":\"" + password + "\"}";
 
                         HttpResponseWrapper responseWrapper = httpService.sendPostRequest("auth/login", requestBody);
@@ -188,7 +189,11 @@ public class Main extends Application {
                         if (statusCode == 200) {
                             JsonNode userNode = jsonResponse.get("user");
                             User admin = new User(Integer.parseInt(userNode.get("id").asText()), userNode.get("nom").asText(), userNode.get("prenom").asText(), userNode.get("email").asText(), userNode.get("motDePasse").asText(), userNode.get("role").asText(), Instant.parse(userNode.get("dateInscription").asText()), userNode.get("estBenevole").asBoolean(), jsonResponse.get("token").asText(), false);
-
+                            if(!Objects.equals(admin.getRole(), "Administrateur")){
+                                VueConnexionEchoue vueEchoue = new VueConnexionEchoue();
+                                vueEchoue.showAndWait();
+                                return;
+                            }
                             Session.ouvrir(admin);
                             itemConnecter.setDisable(true);
                             itemDeconnecter.setDisable(false);
@@ -274,6 +279,7 @@ public class Main extends Application {
             } else {
                 alertQuitter.close();
             }
+            Platform.exit();
         });
 
         itemPlanificationTaches.setOnAction(event -> {

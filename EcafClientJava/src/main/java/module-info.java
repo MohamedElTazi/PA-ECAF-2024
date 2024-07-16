@@ -8,6 +8,7 @@ module com.ecaf.ecafclientjava {
     requires javafx.fxml;
     requires com.fasterxml.jackson.databind;
     requires com.google.gson;
+    requires com.calendarfx.view;
 
     exports com.ecaf.ecafclientjava.entites;
     opens com.ecaf.ecafclientjava.entites to com.fasterxml.jackson.databind, com.google.gson;

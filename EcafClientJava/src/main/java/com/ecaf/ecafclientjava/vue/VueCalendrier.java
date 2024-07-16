@@ -4,161 +4,95 @@ import com.ecaf.ecafclientjava.entites.AG;
 import com.ecaf.ecafclientjava.entites.Evenement;
 import com.ecaf.ecafclientjava.entites.Tache;
 import com.ecaf.ecafclientjava.technique.Theme;
-import javafx.geometry.Pos;
-import javafx.scene.control.*;
-import javafx.scene.layout.*;
-import javafx.scene.text.Font;
+import com.calendarfx.model.Calendar;
+import com.calendarfx.model.CalendarSource;
+import com.calendarfx.model.Entry;
+import com.calendarfx.view.CalendarView;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.Dialog;
+import javafx.scene.layout.VBox;
 
-import java.time.DayOfWeek;
 import java.time.LocalDate;
-import java.time.YearMonth;
+import java.time.LocalTime;
 import java.time.ZoneId;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
-import java.util.stream.Collectors;
 
 public class VueCalendrier extends VBox {
 
-    private YearMonth currentYearMonth;
-    private final GridPane calendarGrid;
-    private final Label monthYearLabel;
+    private final CalendarView calendarView;
     private final List<Evenement> evenements;
     private final List<Tache> taches;
     private final List<AG> ags;
-    private final ListView<String> eventListView;
 
     public VueCalendrier(List<Evenement> evenements, List<Tache> taches, List<AG> ags) {
         this.evenements = evenements;
         this.taches = taches;
         this.ags = ags;
-        currentYearMonth = YearMonth.now();
 
-        // Header with navigation and month/year label
-        HBox header = new HBox();
-        Button prevMonthButton = new Button("<<");
-        prevMonthButton.setOnAction(e -> changeMonth(-1));
-        Button nextMonthButton = new Button(">>");
-        nextMonthButton.setOnAction(e -> changeMonth(1));
-        monthYearLabel = new Label();
-        header.getChildren().addAll(prevMonthButton, monthYearLabel, nextMonthButton);
-        header.setAlignment(Pos.CENTER);
-        HBox.setHgrow(monthYearLabel, Priority.ALWAYS);
-        monthYearLabel.setMaxWidth(Double.MAX_VALUE);
-        monthYearLabel.setAlignment(Pos.CENTER);
-        monthYearLabel.setFont(new Font("Arial", 24));
+        // Créer une instance de CalendarView
+        calendarView = new CalendarView();
 
-        // Calendar grid
-        calendarGrid = new GridPane();
-        calendarGrid.setGridLinesVisible(true);
-        calendarGrid.setAlignment(Pos.CENTER);
-        calendarGrid.setPrefSize(500, 300);
-        for (int i = 0; i < 7; i++) {
-            ColumnConstraints col = new ColumnConstraints();
-            col.setPercentWidth(100.0 / 7);
-            calendarGrid.getColumnConstraints().add(col);
-        }
+        // Créer et configurer le Calendar
+        Calendar calendar = new Calendar("Planning");
+        addEntriesToCalendar(calendar);
 
-        for (int i = 0; i < 7; i++) {
-            RowConstraints row = new RowConstraints();
-            row.setPercentHeight(100.0 / 7);
-            calendarGrid.getRowConstraints().add(row);
-        }
+        // Créer et configurer le CalendarSource
+        CalendarSource calendarSource = new CalendarSource("Planning");
+        calendarSource.getCalendars().add(calendar);
+        calendarView.getCalendarSources().add(calendarSource);
 
-        // Event list view
-        eventListView = new ListView<>();
-        eventListView.setPrefHeight(200);
+        // Configurer l'affichage des détails des entrées
+        calendarView.setEntryDetailsCallback(param -> {
+            Entry<?> entry = param.getEntry();
+            showAssignmentDialog(entry);
+            return null;
+        });
 
-        updateCalendar();
-
-        this.getChildren().addAll(header, calendarGrid, eventListView);
-
-        applyCurrentTheme();
+        // Ajouter le CalendarView à la VBox
+        this.getChildren().add(calendarView);
     }
 
-    private void updateCalendar() {
-        calendarGrid.getChildren().clear();
-        monthYearLabel.setText(currentYearMonth.getMonth().toString() + " " + currentYearMonth.getYear());
+    private void addEntriesToCalendar(Calendar calendar) {
+        evenements.forEach(event -> {
+            Entry<String> entry = new Entry<>(event.getNom());
+            LocalDate startDate = LocalDate.ofInstant(event.getDate(), ZoneId.systemDefault());
+            LocalTime startTime = LocalTime.ofInstant(event.getDate(), ZoneId.systemDefault());
+            entry.changeStartDate(startDate);
+            entry.changeStartTime(startTime);
+            entry.setLocation(event.getDescription());
+            calendar.addEntry(entry);
+        });
 
-        DayOfWeek[] daysOfWeek = {
-                DayOfWeek.MONDAY,
-                DayOfWeek.TUESDAY,
-                DayOfWeek.WEDNESDAY,
-                DayOfWeek.THURSDAY,
-                DayOfWeek.FRIDAY,
-                DayOfWeek.SATURDAY,
-                DayOfWeek.SUNDAY
-        };
-        for (int col = 0; col < daysOfWeek.length; col++) {
-            Label dayLabel = new Label(daysOfWeek[col].getDisplayName(java.time.format.TextStyle.FULL, Locale.FRANCE));
-            dayLabel.setAlignment(Pos.CENTER);
-            dayLabel.setMaxWidth(Double.MAX_VALUE);
-            calendarGrid.add(dayLabel, col, 0);
-        }
+        taches.forEach(task -> {
+            Entry<String> entry = new Entry<>(task.getDescription());
+            LocalDate startDate = LocalDate.ofInstant(task.getDateDebut(), ZoneId.systemDefault());
+            LocalDate endDate = LocalDate.ofInstant(task.getDateFin(), ZoneId.systemDefault());
+            LocalTime startTime = LocalTime.ofInstant(task.getDateDebut(), ZoneId.systemDefault());
+            LocalTime endTime = LocalTime.ofInstant(task.getDateFin(), ZoneId.systemDefault());
+            entry.changeStartDate(startDate);
+            entry.changeEndDate(endDate);
+            entry.changeStartTime(startTime);
+            entry.changeEndTime(endTime);
+            calendar.addEntry(entry);
+        });
 
-        LocalDate firstOfMonth = currentYearMonth.atDay(1);
-        int dayOfWeek = (firstOfMonth.getDayOfWeek().getValue() + 6) % 7; // Convert to Monday=0, Tuesday=1, ..., Sunday=6
-
-        for (int day = 1; day <= currentYearMonth.lengthOfMonth(); day++) {
-            LocalDate date = currentYearMonth.atDay(day);
-            Button dayButton = new Button(String.valueOf(day));
-            dayButton.setMaxWidth(Double.MAX_VALUE);
-            dayButton.setMaxHeight(Double.MAX_VALUE);
-
-            if (hasEvent(date) || hasTask(date) || hasAg(date)) {
-                dayButton.setStyle("-fx-background-color: lightgreen;");
-            }
-            dayButton.setOnAction(e -> handleDayClick(date));
-
-            int col = (dayOfWeek + day - 1) % 7;
-            int row = (dayOfWeek + day - 1) / 7 + 1;
-            calendarGrid.add(dayButton, col, row);
-        }
+        ags.forEach(ag -> {
+            Entry<String> entry = new Entry<>(ag.getDescription());
+            LocalDate startDate = LocalDate.ofInstant(ag.getDate(), ZoneId.systemDefault());
+            LocalTime startTime = LocalTime.ofInstant(ag.getDate(), ZoneId.systemDefault());
+            entry.changeStartDate(startDate);
+            entry.changeStartTime(startTime);
+            calendar.addEntry(entry);
+        });
     }
 
-    private boolean hasEvent(LocalDate date) {
-        return evenements.stream()
-                .anyMatch(event -> LocalDate.ofInstant(event.getDate(), ZoneId.systemDefault()).equals(date));
+    private void showAssignmentDialog(Entry<?> entry) {
+        // Implémenter le code pour afficher les détails de l'entrée dans une boîte de dialogue
+        Dialog<String> dialog = new Dialog<>();
+        dialog.setTitle("Détails de l'entrée");
+        dialog.setContentText(entry.getTitle() + "\n" + entry.getLocation());
+        dialog.getDialogPane().getButtonTypes().add(ButtonType.OK);
+        dialog.showAndWait();
     }
-    private boolean hasTask(LocalDate date) {
-        return taches.stream()
-                .anyMatch(task -> LocalDate.ofInstant(task.getDateDebut(), ZoneId.systemDefault()).equals(date));
-    }
-    private boolean hasAg(LocalDate date) {
-        return ags.stream()
-                .anyMatch(ags -> LocalDate.ofInstant(ags.getDate(), ZoneId.systemDefault()).equals(date));
-    }
-
-    private void handleDayClick(LocalDate date) {
-        List<String> eventDetails = evenements.stream()
-                .filter(event -> LocalDate.ofInstant(event.getDate(), ZoneId.systemDefault()).equals(date))
-                .map(event -> "Événement : " + event.getNom() + " : " + event.getDescription())
-                .collect(Collectors.toList());
-
-        List<String> taskDetails = taches.stream()
-                .filter(task -> LocalDate.ofInstant(task.getDateDebut(), ZoneId.systemDefault()).equals(date))
-                .map(task -> "Tâche : " + task.getDescription())
-                .collect(Collectors.toList());
-
-        List<String> agDetails = ags.stream()
-                .filter(ag -> LocalDate.ofInstant(ag.getDate(), ZoneId.systemDefault()).equals(date))
-                .map(ag -> "AG : " + ag.getDescription())
-                .collect(Collectors.toList());
-
-        eventListView.getItems().setAll(eventDetails);
-        eventListView.getItems().addAll(taskDetails);
-        eventListView.getItems().addAll(agDetails);
-    }
-
-    private void changeMonth(int months) {
-        currentYearMonth = currentYearMonth.plusMonths(months);
-        updateCalendar();
-    }
-
-    public void applyCurrentTheme() {
-        this.getStylesheets().clear();
-        this.getStylesheets().add(getClass().getResource(Theme.themeVueCalendrier).toExternalForm());
-        this.setStyle("-fx-background-color: " + Theme.backgroudColorMain + ";");
-    }
-
 }
+

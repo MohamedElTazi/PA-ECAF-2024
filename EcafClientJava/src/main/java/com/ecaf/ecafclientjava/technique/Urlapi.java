@@ -1,7 +1,7 @@
 package com.ecaf.ecafclientjava.technique;
 
 public enum Urlapi {
-    BASE_URL("http://localhost:3000/");
+    BASE_URL("https://pa-api-0tcm.onrender.com/");
 
     private final String url;
 

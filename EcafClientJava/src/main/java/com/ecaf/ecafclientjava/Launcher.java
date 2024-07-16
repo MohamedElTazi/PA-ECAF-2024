@@ -18,8 +18,6 @@ public class Launcher {
         } catch (Exception e) {
             e.printStackTrace();
         }
-
-        // Lancer l'application normalement si aucune mise à jour n'est disponible
         Main.main(args);
     }
 }
