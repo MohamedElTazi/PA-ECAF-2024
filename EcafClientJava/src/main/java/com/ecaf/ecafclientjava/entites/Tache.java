@@ -12,15 +12,17 @@ public class Tache {
 
     // Associations
     private User responsable;
+    private Ressource ressource;
 
     // Constructeur
-    public Tache(int tacheID, String description, Instant dateDebut, Instant dateFin, String statut, User responsable) {
+    public Tache(int tacheID, String description, Instant dateDebut, Instant dateFin, String statut, User responsable,Tache Ressource) {
         this.id = tacheID;
         this.description = description;
         this.dateDebut = dateDebut;
         this.dateFin = dateFin;
         this.statut = statut;
         this.responsable = responsable;
+        this.ressource = ressource;
     }
 
     // Getters et setters
@@ -72,17 +74,25 @@ public class Tache {
         this.responsable = responsable;
     }
 
+    public Ressource getRessource() {
+        return ressource;
+    }
+
+    public void setRessource(Ressource ressource) {
+        this.ressource = ressource;
+    }
+
+
     @Override
     public String toString() {
         return "Tache{" +
-                "tacheID=" + id +
+                "id=" + id +
                 ", description='" + description + '\'' +
                 ", dateDebut=" + dateDebut +
                 ", dateFin=" + dateFin +
                 ", statut='" + statut + '\'' +
                 ", responsable=" + responsable +
+                ", tache=" + ressource +
                 '}';
     }
-
-
 }

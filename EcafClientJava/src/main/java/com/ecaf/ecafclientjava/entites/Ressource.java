@@ -7,7 +7,8 @@ public class Ressource {
     private int quantite;
     private String emplacement;
 
-
+    public Ressource() {
+    }
 
     public Ressource(int ressourceID, String nom, String type, int quantite, String emplacement) {
         this.id = ressourceID;

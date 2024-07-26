@@ -1,5 +1,6 @@
 package com.ecaf.ecafclientjava.vue;
 
+import com.ecaf.ecafclientjava.entites.Ressource;
 import com.ecaf.ecafclientjava.entites.User;
 import com.ecaf.ecafclientjava.technique.HttpResponseWrapper;
 import com.ecaf.ecafclientjava.technique.HttpService;
@@ -14,6 +15,7 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Comparator;
@@ -29,10 +31,12 @@ public class VuePlanificationTache extends Pane {
     private DatePicker dateFinPicker = new DatePicker();
     private ComboBox<String> statutComboBox = new ComboBox<>();
     private ComboBox<Integer> responsableIdComboBox = new ComboBox<>();
+    private ComboBox<Integer> ressourceIdComboBox = new ComboBox<>();
     private Button submitButton = new Button("Submit");
     private Button resetButton = new Button("Reset");
 
     private TableView<User> userTableView = new TableView<>();
+    private TableView<Ressource> ressourceTableView = new TableView<>();
 
     public VuePlanificationTache() {
         // GridPane for form
@@ -74,9 +78,15 @@ public class VuePlanificationTache extends Pane {
         GridPane.setConstraints(responsableIdComboBox, 1, 4);
         responsableIdComboBox.getStyleClass().add("combo-box");
 
-        GridPane.setConstraints(submitButton, 1, 5);
+        Label ressourceIdLabel = new Label("Ressource ID:");
+        ressourceIdLabel.getStyleClass().add("label");
+        GridPane.setConstraints(ressourceIdLabel, 0, 5);
+        GridPane.setConstraints(ressourceIdComboBox, 1, 5);
+        ressourceIdComboBox.getStyleClass().add("combo-box");
+
+        GridPane.setConstraints(submitButton, 1, 6);
         submitButton.getStyleClass().add("button-submit");
-        GridPane.setConstraints(resetButton, 2, 5);
+        GridPane.setConstraints(resetButton, 2, 6);
         resetButton.getStyleClass().add("button-reset");
 
         submitButton.setOnAction(e -> handleSubmit());
@@ -84,14 +94,14 @@ public class VuePlanificationTache extends Pane {
 
         grid.getChildren().addAll(descriptionLabel, descriptionField, dateDebutLabel, dateDebutPicker,
                 dateFinLabel, dateFinPicker, statutLabel, statutComboBox, responsableIdLabel, responsableIdComboBox,
-                submitButton, resetButton);
+                ressourceIdLabel, ressourceIdComboBox, submitButton, resetButton);
 
         // Adding border to the grid
         grid.setBorder(new Border(new BorderStroke(javafx.scene.paint.Color.BLACK, BorderStrokeStyle.SOLID, new CornerRadii(5), BorderWidths.DEFAULT)));
 
-        // VBox for table
-        VBox tableBox = new VBox(100);
-        tableBox.setPadding(new Insets(70, 70, 70, 70));
+        // VBox for tables
+        VBox tableBox = new VBox(0); // Adjust the spacing between elements
+        tableBox.setPadding(new Insets(10, 10, 10, 10)); // Adjust the padding to move elements higher
         tableBox.getStyleClass().add("vbox");
 
         Label userLabel = new Label("Users:");
@@ -99,14 +109,20 @@ public class VuePlanificationTache extends Pane {
         configureUserTableView(userTableView);
         tableBox.getChildren().addAll(userLabel, userTableView);
 
+        Label ressourceLabel = new Label("Ressources:");
+        ressourceLabel.getStyleClass().add("label");
+        configureRessourceTableView(ressourceTableView);
+        tableBox.getChildren().addAll(ressourceLabel, ressourceTableView);
+
         // Main layout with HBox
-        HBox mainLayout = new HBox(50);
-        mainLayout.setPadding(new Insets(40, 40, 40, 40));
+        HBox mainLayout = new HBox(0);
+        mainLayout.setPadding(new Insets(40, 40, 0, 40));
         mainLayout.getStyleClass().add("hbox");
         mainLayout.getChildren().addAll(grid, tableBox);
 
         // Fetch and populate data
         fetchAndPopulateUserData();
+        fetchAndPopulateRessourceData();
 
         getChildren().add(mainLayout);
 
@@ -145,7 +161,33 @@ public class VuePlanificationTache extends Pane {
 
         // Set preferred size for the table (optional, can be removed)
         tableView.setPrefWidth(600); // You can adjust the width as needed
-        tableView.setPrefHeight(400); // You can adjust the height as needed
+        tableView.setPrefHeight(200); // Adjust the height if needed
+    }
+
+    private void configureRessourceTableView(TableView<Ressource> tableView) {
+        TableColumn<Ressource, Integer> idColumn = new TableColumn<>("ID");
+        idColumn.setCellValueFactory(new PropertyValueFactory<>("ressourceID"));
+        idColumn.getStyleClass().add("table-column-header");
+
+        TableColumn<Ressource, String> nomColumn = new TableColumn<>("Nom");
+        nomColumn.setCellValueFactory(new PropertyValueFactory<>("nom"));
+        nomColumn.getStyleClass().add("table-column-header");
+
+        TableColumn<Ressource, String> typeColumn = new TableColumn<>("Type");
+        typeColumn.setCellValueFactory(new PropertyValueFactory<>("type"));
+        typeColumn.getStyleClass().add("table-column-header");
+
+        tableView.getColumns().addAll(idColumn, nomColumn, typeColumn);
+        tableView.getStyleClass().add("table-view");
+
+        // Ensure the table resizes with the window
+        tableView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+        VBox.setVgrow(tableView, Priority.ALWAYS);
+        HBox.setHgrow(tableView, Priority.ALWAYS);
+
+        // Set preferred size for the table (optional, can be removed)
+        tableView.setPrefWidth(600); // You can adjust the width as needed
+        tableView.setPrefHeight(200); // Adjust the height if needed
     }
 
     private void fetchAndPopulateUserData() {
@@ -174,27 +216,62 @@ public class VuePlanificationTache extends Pane {
         }
     }
 
+    private void fetchAndPopulateRessourceData() {
+        HttpService httpService = new HttpService();
+        try {
+            List<Ressource> ressources = httpService.getAllRessources(); // Assurez-vous que cette méthode existe dans votre HttpService
+
+            ObservableList<Ressource> ressourceData = FXCollections.observableArrayList();
+            ressourceData.addAll(ressources);
+
+            FXCollections.sort(ressourceData, Comparator.comparingInt(Ressource::getRessourceID));
+
+            ressourceTableView.setItems(ressourceData);
+
+            // Populate ressourceIdComboBox with ressource IDs
+            ObservableList<Integer> ressourceIds = FXCollections.observableArrayList();
+            for (Ressource ressource : ressourceData) {
+                ressourceIds.add(ressource.getRessourceID());
+            }
+            FXCollections.sort(ressourceIds);
+            ressourceIdComboBox.setItems(ressourceIds);
+        } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
     private void handleSubmit() {
-        if (descriptionField.getText().isEmpty() || dateDebutPicker == null || dateFinPicker == null || statutComboBox.getValue() == null || responsableIdComboBox.getValue() == null) {
+        if (descriptionField.getText().isEmpty() || dateDebutPicker.getValue() == null || dateFinPicker.getValue() == null || statutComboBox.getValue() == null || responsableIdComboBox.getValue() == null || ressourceIdComboBox.getValue() == null) {
             showAlert(Alert.AlertType.ERROR, "Erreur Formulaire!", "Veuillez remplir tous les champs du formulaire.");
             return;
         }
+
+        LocalDate dateDebut = dateDebutPicker.getValue();
+        LocalDate dateFin = dateFinPicker.getValue();
+        LocalDate today = LocalDate.now();
+
+        if (!areDatesValid(dateDebut, dateFin, today)) {
+            showAlert(Alert.AlertType.ERROR, "Erreur de Date!", "La date de début doit être antérieure à la date de fin et ne peut pas être antérieure à la date d'aujourd'hui.");
+            return;
+        }
+
         String description = descriptionField.getText();
-        LocalDateTime dateDebut = dateDebutPicker.getValue().atStartOfDay();
-        LocalDateTime dateFin = dateFinPicker.getValue() != null ? dateFinPicker.getValue().atStartOfDay() : null;
+        LocalDateTime dateDebutTime = dateDebut.atStartOfDay();
+        LocalDateTime dateFinTime = dateFin != null ? dateFin.atStartOfDay() : null;
         String statut = statutComboBox.getValue();
         Integer responsableId = responsableIdComboBox.getValue();
+        Integer ressourceId = ressourceIdComboBox.getValue();
 
         // Add validation and error handling
 
         // Format dates for database
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        String dateDebutStr = dateDebut.format(formatter);
-        String dateFinStr = dateFin.format(formatter);
+        String dateDebutStr = dateDebutTime.format(formatter);
+        String dateFinStr = dateFinTime != null ? dateFinTime.format(formatter) : null;
 
         // Prepare JSON or any other format to send to backend
-        String requestBody = String.format("{\"description\":\"%s\", \"dateDebut\":\"%s\", \"dateFin\":\"%s\", \"statut\":\"%s\", \"responsable\":%d}",
-                description, dateDebutStr, dateFinStr, statut, responsableId);
+        String requestBody = String.format("{\"description\":\"%s\", \"dateDebut\":\"%s\", \"dateFin\":\"%s\", \"statut\":\"%s\", \"responsable\":%d, \"ressource\":%d}",
+                description, dateDebutStr, dateFinStr, statut, responsableId, ressourceId);
 
         // Send request to backend
         try {
@@ -213,12 +290,17 @@ public class VuePlanificationTache extends Pane {
         }
     }
 
+    private boolean areDatesValid(LocalDate dateDebut, LocalDate dateFin, LocalDate today) {
+        return (dateDebut.isEqual(today) || dateDebut.isAfter(today)) && (dateDebut.isBefore(dateFin) || dateDebut.isEqual(dateFin));
+    }
+
     private void handleReset() {
         descriptionField.clear();
         dateDebutPicker.setValue(null);
         dateFinPicker.setValue(null);
         statutComboBox.setValue(null);
         responsableIdComboBox.setValue(null);
+        ressourceIdComboBox.setValue(null);
     }
 
     private void showAlert(Alert.AlertType alertType, String title, String message) {

@@ -57,7 +57,7 @@ public class Main extends Application {
     private VueAjoutRessource vueAjoutRessource;
     private VueGestionTache vueGestionTache;
     private VuePlanificationTache vuePlanificationTache;
-    private static final String VERSION = "version_1.0.1"; // Changez la version pour vérifier la mise à jour
+    private static final String VERSION = "version_1.0.0";
     private static final Logger LOGGER = Logger.getLogger(Main.class.getName());
 
 
@@ -110,6 +110,12 @@ public class Main extends Application {
         MenuItem itemModeSombre = new MenuItem("Mode sombre");
         menuTheme.getItems().addAll(itemModeClair, itemModeSombre);
         barreMenus.getMenus().add(menuTheme);
+
+        // Menu Maj
+        Menu menuMaj = new Menu("Mise à jour");
+        MenuItem itemMaj = new MenuItem("Mettre à jour l'application");
+        menuMaj.getItems().add(itemMaj);
+        barreMenus.getMenus().add(menuMaj);
 
         root.setTop(barreMenus);
 
@@ -178,8 +184,8 @@ public class Main extends Application {
                 Pair<String, String> result = reponse.get();
                 if (!result.getKey().isEmpty() && !result.getValue().isEmpty()) {
                     try {
-                        String username = result.getKey();//"alice.martin@email.com";
-                        String password = result.getValue();//"motdepasse2";
+                        String username = "alice.martin@email.com";//result.getKey();//"alice.martin@email.com";
+                        String password = "motdepasse2";//result.getValue();//"motdepasse2";
                         String requestBody = "{\"email\":\"" + username + "\", \"motDePasse\":\"" + password + "\"}";
 
                         HttpResponseWrapper responseWrapper = httpService.sendPostRequest("auth/login", requestBody);

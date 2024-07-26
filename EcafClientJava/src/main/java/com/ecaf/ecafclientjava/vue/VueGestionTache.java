@@ -1,5 +1,6 @@
 package com.ecaf.ecafclientjava.vue;
 
+import com.ecaf.ecafclientjava.entites.Ressource;
 import com.ecaf.ecafclientjava.entites.Tache;
 import com.ecaf.ecafclientjava.entites.User;
 import com.ecaf.ecafclientjava.technique.HttpResponseWrapper;
@@ -33,20 +34,23 @@ public class VueGestionTache extends BorderPane {
     private int statusCode;
     private TableView<User> userTableView = new TableView<>();
     private TableView<Tache> tacheTableView = new TableView<>();
+    private TableView<Ressource> ressourceTableView = new TableView<>();
 
     public VueGestionTache() {
         // Configure the TableView
         configureTacheTableView();
         configureUserTableView(userTableView);
+        configureRessourceTableView(ressourceTableView);
 
         // Fetch and populate data
         fetchAndPopulateTacheData();
         fetchAndPopulateUserData();
+        fetchAndPopulateRessourceData();
 
         // Set the layout
         VBox vbox = new VBox(10);
         vbox.setPadding(new Insets(20, 20, 20, 20));
-        vbox.getChildren().addAll(tacheTableView, userTableView);
+        vbox.getChildren().addAll(tacheTableView, userTableView, ressourceTableView);
 
         // Add to the BorderPane
         setCenter(vbox);
@@ -72,6 +76,24 @@ public class VueGestionTache extends BorderPane {
         roleColumn.setCellValueFactory(new PropertyValueFactory<>("role"));
 
         tableView.getColumns().addAll(idColumn, nomColumn, prenomColumn, emailColumn, roleColumn);
+
+        // Appliquer la politique de redimensionnement automatique
+        tableView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+
+        applyTableStyles(tableView);
+    }
+
+    private void configureRessourceTableView(TableView<Ressource> tableView) {
+        TableColumn<Ressource, Integer> idColumn = new TableColumn<>("ID");
+        idColumn.setCellValueFactory(new PropertyValueFactory<>("ressourceID"));
+
+        TableColumn<Ressource, String> nomColumn = new TableColumn<>("Nom");
+        nomColumn.setCellValueFactory(new PropertyValueFactory<>("nom"));
+
+        TableColumn<Ressource, String> typeColumn = new TableColumn<>("Type");
+        typeColumn.setCellValueFactory(new PropertyValueFactory<>("type"));
+
+        tableView.getColumns().addAll(idColumn, nomColumn, typeColumn);
 
         // Appliquer la politique de redimensionnement automatique
         tableView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
@@ -141,12 +163,31 @@ public class VueGestionTache extends BorderPane {
             return new SimpleStringProperty(responsable != null ? responsable.getNom() + " " + responsable.getPrenom() : "N/A");
         });
 
+        TableColumn<Tache, String> idRessourceColumn = new TableColumn<>("ID Ressource");
+        idRessourceColumn.setCellValueFactory(cellData -> {
+            Ressource ressource = cellData.getValue().getRessource();
+            return new SimpleStringProperty(ressource != null ? String.valueOf(ressource.getRessourceID()) : "N/A");
+        });
+        idRessourceColumn.setCellFactory(TextFieldTableCell.forTableColumn());
+        idRessourceColumn.setOnEditCommit(event -> {
+            Tache tache = event.getRowValue();
+            Ressource ressource = new Ressource();
+            ressource.setRessourceID(Integer.parseInt(event.getNewValue()));
+            tache.setRessource(ressource);
+            handleEditTache(tache);
+        });
+
+        TableColumn<Tache, String> ressourceColumn = new TableColumn<>("Ressource");
+        ressourceColumn.setCellValueFactory(cellData -> {
+            Ressource ressource = cellData.getValue().getRessource();
+            return new SimpleStringProperty(ressource != null ? ressource.getNom() : "N/A");
+        });
+
         TableColumn<Tache, Void> actionColumn = new TableColumn<>("Action");
         actionColumn.setCellFactory(createButtonCellFactory());
 
-        tacheTableView.getColumns().addAll(idColumn, descriptionColumn, dateDebutColumn, dateFinColumn, statutColumn, idResponsableColumn, responsableColumn, actionColumn);
+        tacheTableView.getColumns().addAll(idColumn, descriptionColumn, dateDebutColumn, dateFinColumn, statutColumn, idResponsableColumn, responsableColumn, idRessourceColumn, ressourceColumn, actionColumn);
 
-        // Appliquer la politique de redimensionnement automatique
         tacheTableView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
 
         applyTableStyles(tacheTableView);
@@ -190,7 +231,6 @@ public class VueGestionTache extends BorderPane {
     }
 
     private void fetchAndPopulateTacheData() {
-        HttpService httpService = new HttpService();
         try {
             List<Tache> taches = httpService.getAllTaches(); // Assurez-vous que cette méthode existe dans votre HttpService
 
@@ -203,7 +243,6 @@ public class VueGestionTache extends BorderPane {
     }
 
     private void fetchAndPopulateUserData() {
-        HttpService httpService = new HttpService();
         try {
             List<User> admins = httpService.getUsersByRole("Administrateur");
             List<User> adherents = httpService.getUsersByRole("Adherent");
@@ -218,15 +257,29 @@ public class VueGestionTache extends BorderPane {
         }
     }
 
+    private void fetchAndPopulateRessourceData() {
+        try {
+            List<Ressource> ressources = httpService.getAllRessources(); // Assurez-vous que cette méthode existe dans votre HttpService
+
+            ObservableList<Ressource> ressourceData = FXCollections.observableList(ressources);
+
+            ressourceTableView.setItems(ressourceData);
+        } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
     private void handleEditTache(Tache tache) {
         try {
             DateTimeFormatter formatter = DateTimeFormatter.ISO_INSTANT;
             String requestBody = "{"
+
                     + "\"description\":\"" + tache.getDescription() + "\","
                     + "\"dateDebut\":\"" + formatter.format(tache.getDateDebut()) + "\","
                     + "\"dateFin\":\"" + formatter.format(tache.getDateFin()) + "\","
                     + "\"statut\":\"" + tache.getStatut() + "\","
-                    + "\"responsable\":" + tache.getResponsable().getId()
+                    + "\"responsable\":" + tache.getResponsable().getId() + ","
+                    + "\"ressource\":" + tache.getRessource().getRessourceID()
                     + "}";
 
             HttpResponseWrapper responseWrapper = httpService.sendPatchRequest("taches/" + tache.getTacheID(), requestBody);

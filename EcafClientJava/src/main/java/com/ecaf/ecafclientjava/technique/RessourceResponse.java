@@ -16,7 +16,7 @@ public class RessourceResponse {
     private int totalCount;
 
     // Getters et setters
-    public List<Ressource> getTaches() {
+    public List<Ressource> getRessources() {
         return ressources;
     }
 

@@ -133,8 +133,8 @@ public class HttpService {
         if (responseWrapper.getStatusCode() == 200) {
             Gson gson = new GsonBuilder().create();
             String responseBody = responseWrapper.getBody().toString(); // Convert JsonNode to String
-            RessourceResponse tacheResponse = gson.fromJson(responseBody, RessourceResponse.class);
-            ressources = tacheResponse.getTaches();
+            RessourceResponse ressourceResponse = gson.fromJson(responseBody, RessourceResponse.class);
+            ressources = ressourceResponse.getRessources();
             ;
         }
         return ressources;

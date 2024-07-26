@@ -15,7 +15,7 @@ import java.util.logging.Logger;
 public class UpdateManager {
     private static final Logger LOGGER = Logger.getLogger(UpdateManager.class.getName());
     private static final String UPDATE_FILE_PATH = "update.jar";
-    private static final String CURRENT_VERSION = "version_1.0.1";
+    private static final String CURRENT_VERSION = "version_1.0.0";
     private static final String UPDATE_URL = "https://github.com/R-Mehdi94/ECAF-JAR/raw/main/ecafclientjava.jar";
 
     public static boolean isUpdateAvailable() throws Exception {
