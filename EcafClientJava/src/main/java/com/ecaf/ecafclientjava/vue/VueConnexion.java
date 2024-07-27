@@ -28,7 +28,7 @@ public class VueConnexion extends Dialog<Pair<String, String>> {
         vbSaisies.getChildren().add(mdp);
 
         // Appliquer la classe CSS à la boîte de dialogue
-        this.getDialogPane().getStylesheets().add(getClass().getResource(Theme.themeVueConnexionEchoueVide).toExternalForm());
+        this.getDialogPane().getStylesheets().add(getClass().getResource(Theme.themeVueConnexion).toExternalForm());
         this.getDialogPane().getStyleClass().add("dialog-pane");
 
         this.getDialogPane().setContent(vbSaisies);

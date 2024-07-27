@@ -1,0 +1,37 @@
+.dialog-pane {
+    -fx-padding: 20;
+    -fx-background-color: #f3e5f5; /* Violet très clair */
+    -fx-border-color: #b0bec5; /* Gris clair */
+    -fx-border-width: 1;
+    -fx-border-radius: 5;
+    -fx-background-radius: 5;
+}
+
+.label {
+    -fx-font-size: 14px;
+    -fx-text-fill: #4a148c; /* Violet foncé */
+    -fx-font-weight: bold;
+}
+
+.text-field {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #b0bec5; /* Gris clair */
+    -fx-border-radius: 3;
+    -fx-padding: 5;
+    -fx-font-size: 14px;
+}
+
+.button-bar .button {
+    -fx-background-color: #ce93d8; /* Violet moyen */
+    -fx-text-fill: white;
+    -fx-border-radius: 3;
+    -fx-padding: 5 10;
+}
+
+.button-bar .button:hover {
+    -fx-background-color: #e1bee7; /* Violet clair au survol */
+}
+
+.vbox {
+    -fx-spacing: 10;
+}

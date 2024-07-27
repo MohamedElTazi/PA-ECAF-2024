@@ -1,0 +1,104 @@
+.root {
+    -fx-font-family: 'Arial';
+}
+
+.grid-pane {
+    -fx-padding: 40;
+    -fx-hgap: 30;
+    -fx-vgap: 30;
+    -fx-border-color: #a5d6a7; /* Bordure vert clair */
+    -fx-border-width: 1;
+    -fx-border-radius: 5;
+    -fx-background-color: #e8f5e9; /* Fond vert très clair */
+}
+
+.label {
+    -fx-font-size: 14px;
+    -fx-text-fill: #2e7d32; /* Texte vert foncé */
+    -fx-font-weight: bold;
+}
+
+.text-field, .combo-box, .date-picker {
+    -fx-background-color: white;
+    -fx-border-color: #a5d6a7; /* Bordure vert clair */
+    -fx-border-radius: 5;
+    -fx-padding: 5;
+    -fx-font-size: 14px;
+}
+
+.button {
+    -fx-border-radius: 5;
+    -fx-padding: 10 20;
+}
+
+.button-submit {
+    -fx-background-color: #66bb6a; /* Vert */
+    -fx-text-fill: white;
+}
+
+.button-submit:hover {
+    -fx-background-color: #43a047; /* Vert foncé au survol */
+}
+
+.button-reset {
+    -fx-background-color: #8d6e63; /* Brun */
+    -fx-text-fill: white;
+}
+
+.button-reset:hover {
+    -fx-background-color: #6d4c41; /* Brun foncé au survol */
+}
+
+.button-delete {
+    -fx-background-color: #ef5350; /* Rouge clair */
+    -fx-text-fill: white;
+}
+
+.button-delete:hover {
+    -fx-background-color: #e53935; /* Rouge foncé au survol */
+}
+
+.vbox {
+    -fx-spacing: 10;
+    -fx-padding: 40;
+}
+
+.hbox {
+    -fx-spacing: 50;
+    -fx-padding: 40;
+}
+
+.table-view {
+    -fx-pref-width: 800; /* Agrandir la largeur du tableau */
+    -fx-pref-height: 400; /* Agrandir la hauteur du tableau */
+    -fx-border-color: #a5d6a7; /* Bordure vert clair */
+    -fx-border-width: 1;
+    -fx-border-radius: 5;
+    -fx-background-color: #ffffff;
+    -fx-table-cell-border-color: transparent;
+    -fx-padding: 15;
+}
+
+.table-view .column-header-background {
+    -fx-background-color: #c8e6c9; /* Vert très clair */
+    -fx-padding: 10;
+}
+
+.table-column-header {
+    -fx-background-color: transparent;
+    -fx-text-fill: #2e7d32; /* Vert foncé */
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-alignment: CENTER_LEFT;
+    -fx-padding: 6 6;
+}
+
+.table-row-cell:filled:focused, .table-row-cell:filled:hover {
+    -fx-background-color: #c8e6c9; /* Vert clair au survol */
+    -fx-text-fill: #2e7d32; /* Texte vert foncé */
+}
+
+.table-cell {
+    -fx-border-color: #a5d6a7; /* Ajouter des bordures vert clair pour les cellules individuelles */
+    -fx-border-width: 0 1 1 0; /* Bordures droite et basse */
+}

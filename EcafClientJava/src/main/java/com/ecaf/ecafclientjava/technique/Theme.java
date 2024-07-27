@@ -8,7 +8,6 @@ public class Theme{
     public static String themeAlert = "/com/ecaf/ecafclientjava/css/theme-clair/alert.css";
     public static String themeVueConnexion = "/com/ecaf/ecafclientjava/css/theme-clair/vueConnexion.css";
     public static String themeVueConnexionEchoueVide = "/com/ecaf/ecafclientjava/css/theme-clair/vueConnexionEchoueVide.css";
-    public static String themeVueCalendrier = "/com/ecaf/ecafclientjava/css/theme-clair/vueCalendrier.css";
     public static String backgroudColorMain = "#f0f0f0";
 
 

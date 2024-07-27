@@ -28,6 +28,7 @@ public class PluginManager {
         }
 
         for (File file : files) {
+            System.out.println("ICIIIII " + file.getName());
             System.out.println("Loading JAR: " + file.getAbsolutePath());
             URL[] urls = { file.toURI().toURL() };
             try (URLClassLoader loader = new URLClassLoader(urls, getClass().getClassLoader())) {
@@ -50,8 +51,12 @@ public class PluginManager {
     private List<String> getPluginClassNames(URLClassLoader loader) {
         List<String> pluginClassNames = new ArrayList<>();
         pluginClassNames.add("com.ecaf.ecafclientjava.plugins.DarkThemePlugin");
+        pluginClassNames.add("com.ecaf.ecafclientjava.plugins.BlueThemePlugin");
+        pluginClassNames.add("com.ecaf.ecafclientjava.plugins.NatureThemePlugin");
+        pluginClassNames.add("com.ecaf.ecafclientjava.plugins.VioletThemePlugin");
         return pluginClassNames;
     }
+
 
     public List<ThemePlugin> getThemePlugins() {
         return themePlugins;

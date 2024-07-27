@@ -4,35 +4,34 @@ import com.ecaf.ecafclientjava.entites.AG;
 import com.ecaf.ecafclientjava.entites.Evenement;
 import com.ecaf.ecafclientjava.entites.Tache;
 import com.ecaf.ecafclientjava.entites.User;
+import com.ecaf.ecafclientjava.plugins.calculatrice.CalculatorPlugin;
 import com.ecaf.ecafclientjava.plugins.PluginManager;
+import com.ecaf.ecafclientjava.plugins.kanban.KanbanPlugin;
+import com.ecaf.ecafclientjava.plugins.note.NotePlugin;
 import com.ecaf.ecafclientjava.plugins.theme.ThemePlugin;
 import com.ecaf.ecafclientjava.technique.*;
 import com.ecaf.ecafclientjava.vue.*;
-
 import com.fasterxml.jackson.databind.JsonNode;
-import javafx.animation.PauseTransition;
-import javafx.animation.SequentialTransition;
 import javafx.application.Application;
 import javafx.application.Platform;
-
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
-import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.StackPane;
-import javafx.scene.text.Font;
+import javafx.scene.layout.Pane;
+import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
-import javafx.util.Duration;
+import javafx.stage.StageStyle;
 import javafx.util.Pair;
-
+import java.io.File;
 import java.io.IOException;
-import javafx.scene.control.Alert;
+import java.net.URL;
+import java.net.URLClassLoader;
 import javafx.scene.control.Alert.AlertType;
-
 import java.time.Instant;
 import java.util.List;
 import java.util.Objects;
@@ -57,10 +56,8 @@ public class Main extends Application {
     private VueAjoutRessource vueAjoutRessource;
     private VueGestionTache vueGestionTache;
     private VuePlanificationTache vuePlanificationTache;
-    private static final String VERSION = "version_1.0.0";
+    private static final String VERSION = "version_1.0.1";
     private static final Logger LOGGER = Logger.getLogger(Main.class.getName());
-
-
 
     public Main() throws IOException, InterruptedException {
     }
@@ -86,8 +83,7 @@ public class Main extends Application {
         MenuItem itemMenuPrincipal = new MenuItem("Accueil");
         MenuItem itemCalendrier = new MenuItem("Calendrier");
         Menu menuPrincipal = new Menu("Menu Principal");
-        menuPrincipal.getItems().add(itemMenuPrincipal);
-        menuPrincipal.getItems().add(itemCalendrier);
+        menuPrincipal.getItems().addAll(itemMenuPrincipal, itemCalendrier);
         barreMenus.getMenus().add(menuPrincipal);
 
         // Menu Ressource
@@ -108,12 +104,74 @@ public class Main extends Application {
         Menu menuTheme = new Menu("Thème");
         MenuItem itemModeClair = new MenuItem("Mode clair");
         MenuItem itemModeSombre = new MenuItem("Mode sombre");
-        menuTheme.getItems().addAll(itemModeClair, itemModeSombre);
+        MenuItem itemModeBlue = new MenuItem("Mode Blue");
+        MenuItem itemModeNature = new MenuItem("Mode Nature");
+        MenuItem itemModeViolet = new MenuItem("Mode Violet");
+        menuTheme.getItems().addAll(itemModeClair, itemModeSombre, itemModeBlue, itemModeNature, itemModeViolet);
         barreMenus.getMenus().add(menuTheme);
+
+        // Menu Plugins
+        Menu menuPlugins = new Menu("Plugins");
+        MenuItem menuCalculatrice = new MenuItem("Calculatrice");
+        menuCalculatrice.setOnAction(event -> {
+            CalculatorPlugin calculatorPlugin = loadCalculatorPlugin();
+            if (calculatorPlugin != null) {
+                Pane calculatorUI = calculatorPlugin.getUI();
+
+                Stage calculatorStage = new Stage();
+                calculatorStage.setTitle("Calculatrice");
+
+                Scene calculatorScene = new Scene(calculatorUI, 300, 400);
+                calculatorStage.setScene(calculatorScene);
+                calculatorStage.show();
+            } else {
+                showAlert(Alert.AlertType.ERROR, "Erreur", "Impossible de charger le plugin de calculatrice.");
+            }
+        });
+        menuPlugins.getItems().add(menuCalculatrice);
+        MenuItem menuNote = new MenuItem("Bloc-notes");
+        menuNote.setOnAction(event -> {
+            NotePlugin notePlugin = loadNotePlugin();
+            if (notePlugin != null) {
+                Pane noteUI = notePlugin.getUI();
+
+                Stage noteStage = new Stage();
+                noteStage.setTitle("Bloc-notes");
+
+                Scene noteScene = new Scene(noteUI, 600, 400);
+                noteStage.setScene(noteScene);
+                noteStage.show();
+            } else {
+                showAlert(Alert.AlertType.ERROR, "Erreur", "Impossible de charger le plugin de bloc-notes.");
+            }
+        });
+        menuPlugins.getItems().add(menuNote);
+        // Menu Kanban
+        MenuItem menuKanban = new MenuItem("Kanban");
+        menuKanban.setOnAction(event -> {
+            KanbanPlugin kanbanPlugin = loadKanbanPlugin();
+            if (kanbanPlugin != null) {
+                Pane kanbanUI = kanbanPlugin.getUI();
+
+                Stage kanbanStage = new Stage();
+                kanbanStage.setTitle("Kanban");
+
+                Scene kanbanScene = new Scene(kanbanUI, 800, 600);
+                kanbanStage.setScene(kanbanScene);
+                kanbanStage.show();
+            } else {
+                showAlert(Alert.AlertType.ERROR, "Erreur", "Impossible de charger le plugin Kanban.");
+            }
+        });
+
+        menuPlugins.getItems().add(menuKanban);
+
+        barreMenus.getMenus().add(menuPlugins);
 
         // Menu Maj
         Menu menuMaj = new Menu("Mise à jour");
         MenuItem itemMaj = new MenuItem("Mettre à jour l'application");
+        itemMaj.setOnAction(event -> checkForUpdates());
         menuMaj.getItems().add(itemMaj);
         barreMenus.getMenus().add(menuMaj);
 
@@ -125,8 +183,6 @@ public class Main extends Application {
         stage.setScene(scene);
         stage.show();
 
-
-
         itemDeconnecter.setDisable(true);
         menuRessource.setDisable(true);
         menuTache.setDisable(true);
@@ -134,47 +190,51 @@ public class Main extends Application {
 
         applyCurrentTheme();
 
+        itemModeClair.setOnAction(event -> {
+            Theme.applyTheme("clair", scene);
+            applyCurrentTheme();
+            if (vueMenuPrincipal != null) {
+                vueMenuPrincipal.applyCurrentTheme();
+            }
+            if (vueGestionRessource != null) {
+                vueGestionRessource.applyCurrentTheme();
+            }
+            if (vueAjoutRessource != null) {
+                vueAjoutRessource.applyCurrentTheme();
+            }
+            if (vueGestionTache != null) {
+                vueGestionTache.applyCurrentTheme();
+            }
+            if (vuePlanificationTache != null) {
+                vuePlanificationTache.applyCurrentTheme();
+            }
+        });
 
-        itemModeClair.setOnAction(
-                new EventHandler<ActionEvent>() {
-                    @Override
-                    public void handle(ActionEvent event) {
-                        Theme.applyTheme("clair", scene);
-                        applyCurrentTheme();
-                        if (vueMenuPrincipal != null) {
-                            vueMenuPrincipal.applyCurrentTheme();
-                        }
-                        if (vueGestionRessource != null) {
-                            vueGestionRessource.applyCurrentTheme();
-                        }
-                        if (vueAjoutRessource != null) {
-                            vueAjoutRessource.applyCurrentTheme();
-                        }
-                        if (vueGestionTache != null) {
-                            vueGestionTache.applyCurrentTheme();
-                        }
-                        if (vuePlanificationTache != null) {
-                            vuePlanificationTache.applyCurrentTheme();
-                        }
-                    }
-                }
-        );
-        itemModeSombre.setOnAction(event -> {
-            PluginManager pluginManager = null;
+        EventHandler<ActionEvent> themeEventHandler = event -> {
+            MenuItem source = (MenuItem) event.getSource();
+            String themeName = source.getText().toLowerCase().replace("mode ", "");
+
+            PluginManager pluginManager;
             try {
                 String pluginsDir = "/home/r-mehdi/ESGI/pa/ECAF-JAR/plugins";
                 pluginManager = new PluginManager(pluginsDir);
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
+
             for (ThemePlugin plugin : pluginManager.getThemePlugins()) {
-                if ("sombre".equals(plugin.getThemeName())) {
+                if (themeName.equals(plugin.getThemeName())) {
                     plugin.applyTheme(scene);
                 }
             }
             applyCurrentTheme();
             updateThemesInViews();
-        });
+        };
+
+        itemModeSombre.setOnAction(themeEventHandler);
+        itemModeBlue.setOnAction(themeEventHandler);
+        itemModeNature.setOnAction(themeEventHandler);
+        itemModeViolet.setOnAction(themeEventHandler);
 
         itemConnecter.setOnAction(event -> {
             VueConnexion vue = new VueConnexion();
@@ -285,7 +345,6 @@ public class Main extends Application {
             } else {
                 alertQuitter.close();
             }
-            Platform.exit();
         });
 
         itemPlanificationTaches.setOnAction(event -> {
@@ -312,15 +371,10 @@ public class Main extends Application {
             vueMenuPrincipal = new VueMenuPrincipal();
             root.setCenter(vueMenuPrincipal);
         });
-        itemCalendrier.setOnAction(
-                new EventHandler<ActionEvent>() {
-                    @Override
-                    public void handle(ActionEvent event) {
-                        VueCalendrier vueCalendrier = new VueCalendrier(evenements, taches, ags);
-                        root.setCenter(vueCalendrier);
-                    }
-                }
-        );
+        itemCalendrier.setOnAction(event -> {
+            VueCalendrier vueCalendrier = new VueCalendrier(evenements, taches, ags);
+            root.setCenter(vueCalendrier);
+        });
 
         stage.setOnCloseRequest(event -> {
             event.consume();
@@ -364,11 +418,25 @@ public class Main extends Application {
         });
     }
 
+    private CalculatorPlugin loadCalculatorPlugin() {
+        try {
+            // Chemin vers le fichier JAR du plugin
+            File pluginJar = new File("plugins/calculator-plugin-impl.jar");
+            URL[] urls = {pluginJar.toURI().toURL()};
+            URLClassLoader urlClassLoader = new URLClassLoader(urls);
+
+            // Charger la classe du plugin
+            Class<?> clazz = urlClassLoader.loadClass("com.ecaf.ecafclientjava.plugins.CalculatorPluginImpl");
+            return (CalculatorPlugin) clazz.getDeclaredConstructor().newInstance();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
 
     private void applyCurrentTheme() {
         root.setStyle("-fx-background-color: " + Theme.backgroudColorMain + ";");
     }
-
 
     private void updateThemesInViews() {
         if (vueMenuPrincipal != null) {
@@ -388,43 +456,74 @@ public class Main extends Application {
         }
     }
 
-    /*private void checkForUpdates() {
+    private NotePlugin loadNotePlugin() {
         try {
-            HttpResponseWrapper httpResponseWrapper = httpService.sendGetRequest("fileVersion");
-            jsonResponse = httpResponseWrapper.getBody();
-            JsonNode fileVersionNode = jsonResponse.get("fileVersion");
-            String fileVersion = fileVersionNode.asText();
+            // Chemin vers le fichier JAR du plugin
+            File pluginJar = new File("plugins/note-plugin-impl.jar");
+            URL[] urls = {pluginJar.toURI().toURL()};
+            URLClassLoader urlClassLoader = new URLClassLoader(urls);
 
-            SequentialTransition sequentialTransition = new SequentialTransition();
-
-
-            if (!CURRENT_VERSION.equals(fileVersion)) {
-                sequentialTransition.getChildren().addAll(
-                        createAlertWithDelay(AlertType.INFORMATION, "Mise à jour disponible", "Nouvelle version disponible. Téléchargement en cours..."),
-                        new PauseTransition(Duration.seconds(1)) // Ajoute un délai avant de lancer le téléchargement
-                );
-
-                sequentialTransition.setOnFinished(event -> {
-                    try {
-                        Runtime.getRuntime().exec("bash update.sh");
-                        Platform.exit();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                });
-            }
-
-            sequentialTransition.play();
+            // Charger la classe du plugin
+            Class<?> clazz = urlClassLoader.loadClass("com.ecaf.ecafclientjava.plugins.NotePluginImpl");
+            return (NotePlugin) clazz.getDeclaredConstructor().newInstance();
         } catch (Exception e) {
             e.printStackTrace();
-            showAlert(AlertType.ERROR, "Erreur", "Une erreur est survenue lors de la vérification ou de la mise à jour : " + e.getMessage());
+            return null;
         }
-    }*/
+    }
 
-    private PauseTransition createAlertWithDelay(AlertType alertType, String title, String message) {
-        PauseTransition pause = new PauseTransition(Duration.seconds(2));
-        pause.setOnFinished(event -> showAlert(alertType, title, message));
-        return pause;
+    private KanbanPlugin loadKanbanPlugin() {
+        try {
+            // Chemin vers le fichier JAR du plugin
+            File pluginJar = new File("plugins/kanban-plugin-impl.jar");
+            URL[] urls = {pluginJar.toURI().toURL()};
+            URLClassLoader urlClassLoader = new URLClassLoader(urls);
+
+            // Charger la classe du plugin
+            Class<?> clazz = urlClassLoader.loadClass("com.ecaf.ecafclientjava.plugins.KanbanPluginImpl");
+            return (KanbanPlugin) clazz.getDeclaredConstructor().newInstance();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+
+    private void checkForUpdates() {
+        // Créer une nouvelle fenêtre pour afficher le loader
+        Stage loaderStage = new Stage();
+        ProgressIndicator progressIndicator = new ProgressIndicator();
+        VBox vbox = new VBox(progressIndicator);
+        vbox.setStyle("-fx-padding: 20;");
+        Scene loaderScene = new Scene(vbox);
+        loaderStage.setScene(loaderScene);
+        loaderStage.initModality(Modality.APPLICATION_MODAL);
+        loaderStage.initStyle(StageStyle.UNDECORATED);
+        loaderStage.setTitle("Mise à jour en cours...");
+        loaderStage.setResizable(false);
+
+        // Exécuter la mise à jour dans un nouveau thread
+        new Thread(() -> {
+            Platform.runLater(loaderStage::show); // Afficher le loader
+
+            try {
+                // Vérification de mise à jour
+                if (UpdateManager.isUpdateAvailable()) {
+                    System.out.println("Mise à jour disponible.");
+                    UpdateManager.downloadUpdate();
+                    System.out.println("Mise à jour téléchargée.");
+                    UpdateManager.loadAndRun("update.jar", "com.ecaf.ecafclientjava.Main", "main", String[].class);
+                } else {
+                    System.out.println("Aucune mise à jour disponible.");
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                // Affiche un message d'erreur à l'utilisateur
+                showAlert(AlertType.ERROR, "Échec de la vérification de la mise à jour.", "Voir les logs pour plus de détails");
+            } finally {
+                Platform.runLater(loaderStage::close); // Fermer le loader
+            }
+        }).start();
     }
 
     private void showAlert(AlertType alertType, String title, String message) {

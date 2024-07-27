@@ -1,0 +1,49 @@
+.alert {
+    -fx-font-family: 'Arial';
+    -fx-background-color: #e8f5e9; /* Fond vert très clair */
+    -fx-padding: 20;
+    -fx-border-color: #a5d6a7; /* Bordure vert clair */
+    -fx-border-width: 2;
+    -fx-border-radius: 5;
+}
+
+.dialog-pane {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #a5d6a7; /* Bordure vert clair */
+    -fx-border-width: 1;
+    -fx-border-radius: 5;
+    -fx-padding: 20;
+}
+
+.label {
+    -fx-font-size: 14px;
+    -fx-text-fill: #2e7d32; /* Texte vert foncé */
+}
+
+.button-bar .button {
+    -fx-text-fill: #2e7d32; /* Texte vert foncé */
+    -fx-border-radius: 5;
+    -fx-padding: 10 20;
+}
+
+.button-oui {
+    -fx-background-color: #66bb6a; /* Vert moyen */
+    -fx-text-fill: white;
+    -fx-border-radius: 5;
+    -fx-padding: 10 20;
+}
+
+.button-oui:hover {
+    -fx-background-color: #43a047; /* Vert foncé au survol */
+}
+
+.button-non {
+    -fx-background-color: #ef5350; /* Rouge clair */
+    -fx-text-fill: white;
+    -fx-border-radius: 5;
+    -fx-padding: 10 20;
+}
+
+.button-non:hover {
+    -fx-background-color: #e53935; /* Rouge foncé au survol */
+}

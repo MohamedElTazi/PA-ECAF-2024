@@ -1,0 +1,49 @@
+.alert {
+    -fx-font-family: 'Arial';
+    -fx-background-color: #e0f7fa; /* Fond bleu très clair */
+    -fx-padding: 20;
+    -fx-border-color: #b0bec5; /* Bordure gris clair */
+    -fx-border-width: 2;
+    -fx-border-radius: 5;
+}
+
+.dialog-pane {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #b0bec5; /* Bordure gris clair */
+    -fx-border-width: 1;
+    -fx-border-radius: 5;
+    -fx-padding: 20;
+}
+
+.label {
+    -fx-font-size: 14px;
+    -fx-text-fill: #0277bd; /* Texte bleu foncé */
+}
+
+.button-bar .button {
+    -fx-text-fill: #0277bd; /* Texte bleu foncé */
+    -fx-border-radius: 5;
+    -fx-padding: 10 20;
+}
+
+.button-oui {
+    -fx-background-color: #1e88e5; /* Bleu */
+    -fx-text-fill: white;
+    -fx-border-radius: 5;
+    -fx-padding: 10 20;
+}
+
+.button-oui:hover {
+    -fx-background-color: #1565c0; /* Bleu foncé au survol */
+}
+
+.button-non {
+    -fx-background-color: #ff7043; /* Orange */
+    -fx-text-fill: white;
+    -fx-border-radius: 5;
+    -fx-padding: 10 20;
+}
+
+.button-non:hover {
+    -fx-background-color: #e64a19; /* Orange foncé au survol */
+}
