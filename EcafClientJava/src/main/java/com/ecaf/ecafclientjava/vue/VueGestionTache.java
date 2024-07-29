@@ -371,7 +371,7 @@ public class VueGestionTache extends BorderPane {
             }
         }
     }
-    
+
 
     public void applyCurrentTheme() {
         this.getStylesheets().clear();

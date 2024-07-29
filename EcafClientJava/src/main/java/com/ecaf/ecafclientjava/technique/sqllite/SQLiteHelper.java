@@ -402,6 +402,102 @@ public class SQLiteHelper {
         }
     }
 
+    public static void updateTacheSyncStatus(int tacheID, String syncStatus) {
+        String sql = "UPDATE tache SET sync_status = ? WHERE id = ?";
+        try (Connection conn = connect();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, syncStatus);
+            pstmt.setInt(2, tacheID);
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+    }
+
+    public static void updateRessourceSyncStatus(int ressourceID, String syncStatus) {
+        String sql = "UPDATE ressource SET sync_status = ? WHERE id = ?";
+        try (Connection conn = connect();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, syncStatus);
+            pstmt.setInt(2, ressourceID);
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+    }
+
+    // Méthodes pour récupérer les enregistrements par sync_status
+    public static List<Tache> getTachesBySyncStatus(String syncStatus) {
+        List<Tache> taches = new ArrayList<>();
+        String sql = "SELECT * FROM tache WHERE sync_status = ?";
+        try (Connection conn = connect();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, syncStatus);
+            ResultSet rs = pstmt.executeQuery();
+            while (rs.next()) {
+                Tache tache = new Tache(
+                        rs.getInt("id"),
+                        rs.getString("description"),
+                        rs.getTimestamp("dateDebut").toInstant(),
+                        rs.getTimestamp("dateFin").toInstant(),
+                        rs.getString("statut"),
+                        rs.getInt("responsableId"),
+                        rs.getInt("ressourceId")
+                );
+                taches.add(tache);
+            }
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+        return taches;
+    }
+
+    public static List<Ressource> getRessourcesBySyncStatus(String syncStatus) {
+        List<Ressource> ressources = new ArrayList<>();
+        String sql = "SELECT * FROM ressource WHERE sync_status = ?";
+        try (Connection conn = connect();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, syncStatus);
+            ResultSet rs = pstmt.executeQuery();
+            while (rs.next()) {
+                Ressource ressource = new Ressource(
+                        rs.getInt("id"),
+                        rs.getString("nom"),
+                        rs.getString("type"),
+                        rs.getInt("quantite"),
+                        rs.getString("emplacement")
+                );
+                ressources.add(ressource);
+            }
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+        return ressources;
+    }
+
+    // Méthode pour supprimer définitivement une tâche
+    public static void deleteTachePermanently(int tacheID) {
+        String sql = "DELETE FROM tache WHERE id = ?";
+        try (Connection conn = connect();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, tacheID);
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+    }
+
+    // Méthode pour supprimer définitivement une ressource
+    public static void deleteRessourcePermanently(int ressourceID) {
+        String sql = "DELETE FROM ressource WHERE id = ?";
+        try (Connection conn = connect();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, ressourceID);
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+    }
 
 
 }
