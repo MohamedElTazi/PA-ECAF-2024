@@ -115,7 +115,6 @@ public class VueAjoutRessource extends BorderPane {
             handleReset();
         }
     }
-
     private void handleReset() {
         nomField.clear();
         typeComboBox.setValue(null);
