@@ -6,16 +6,34 @@ public class Ressource {
     private String type;
     private int quantite;
     private String emplacement;
+    private String sync_status;
 
     public Ressource() {
     }
 
-    public Ressource(int ressourceID, String nom, String type, int quantite, String emplacement) {
+    public String getSync_status() {
+        return sync_status;
+    }
+
+    public void setSync_status(String sync_status) {
+        this.sync_status = sync_status;
+    }
+
+    public Ressource(int ressourceID, String nom, String type, int quantite, String emplacement, String sync_status) {
         this.id = ressourceID;
         this.nom = nom;
         this.type = type;
         this.quantite = quantite;
         this.emplacement = emplacement;
+        this.sync_status = sync_status;;
+    }
+
+    public Ressource(String nom, String type, int quantite, String emplacement, String sync_status) {
+        this.nom = nom;
+        this.type = type;
+        this.quantite = quantite;
+        this.emplacement = emplacement;
+        this.sync_status = sync_status;;
     }
 
     public int getQuantite() {

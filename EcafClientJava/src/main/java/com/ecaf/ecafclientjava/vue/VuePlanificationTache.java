@@ -8,6 +8,7 @@ import com.ecaf.ecafclientjava.technique.HttpService;
 import com.ecaf.ecafclientjava.technique.sqllite.NetworkUtil;
 import com.ecaf.ecafclientjava.technique.Theme;
 import com.ecaf.ecafclientjava.technique.sqllite.SQLiteHelper;
+import com.ecaf.ecafclientjava.technique.sqllite.SyncStatus;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
@@ -287,9 +288,8 @@ public class VuePlanificationTache extends Pane {
                     showAlert(Alert.AlertType.ERROR, "Error", "\n" + "Échec de l'ajout d'une tache.");
                 }
             } else {
-                Random random = new Random();
-                int randomNumber = random.nextInt(1000);
-                Tache tache = new Tache(randomNumber, description, dateDebutTime.toInstant(ZoneOffset.UTC), dateFinTime.toInstant(ZoneOffset.UTC), statut, responsableId, ressourceId);
+
+                Tache tache = new Tache(description, dateDebutTime.toInstant(ZoneOffset.UTC), dateFinTime.toInstant(ZoneOffset.UTC), statut, responsableId, ressourceId, SyncStatus.NEW.getStatus());
                 SQLiteHelper.createTache(tache);
                 showAlert(Alert.AlertType.INFORMATION, "Success", "Tache enregistré localement !");
                 handleReset();

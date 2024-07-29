@@ -9,6 +9,8 @@ public class Tache {
     private Instant dateDebut;
     private Instant dateFin;
     private String statut;
+    private String sync_status;
+
 
     // Associations
     private User responsable;
@@ -18,7 +20,7 @@ public class Tache {
     private int ressourceId;
 
     // Constructeur
-    public Tache(int tacheID, String description, Instant dateDebut, Instant dateFin, String statut, User responsable,Ressource ressource) {
+    public Tache(int tacheID, String description, Instant dateDebut, Instant dateFin, String statut, User responsable,Ressource ressource,String sync_status) {
         this.id = tacheID;
         this.description = description;
         this.dateDebut = dateDebut;
@@ -26,16 +28,28 @@ public class Tache {
         this.statut = statut;
         this.responsable = responsable;
         this.ressource = ressource;
+        this.sync_status = sync_status;;
     }
 
-    public Tache(int id, String description, Instant dateDebut, Instant dateFin, String statut, int responsableId, int ressourceId) {
-        this.id = id;
+    public Tache(int tacheID, String description, Instant dateDebut, Instant dateFin, String statut, int responsableId, int ressourceId, String sync_status) {
+        this.id = tacheID;
         this.description = description;
         this.dateDebut = dateDebut;
         this.dateFin = dateFin;
         this.statut = statut;
         this.responsableId = responsableId;
         this.ressourceId = ressourceId;
+        this.sync_status = sync_status;;
+    }
+
+    public Tache(String description, Instant dateDebut, Instant dateFin, String statut, int responsableId, int ressourceId, String sync_status) {
+        this.description = description;
+        this.dateDebut = dateDebut;
+        this.dateFin = dateFin;
+        this.statut = statut;
+        this.responsableId = responsableId;
+        this.ressourceId = ressourceId;
+        this.sync_status = sync_status;;
     }
 
     public int getResponsableId() {
@@ -54,12 +68,13 @@ public class Tache {
         this.ressourceId = ressourceId;
     }
 
-    public Tache(int id, String description, Instant dateDebut, Instant dateFin, String statut) {
+    public Tache(int id, String description, Instant dateDebut, Instant dateFin, String statut, String sync_status) {
         this.id = id;
         this.description = description;
         this.dateDebut = dateDebut;
         this.dateFin = dateFin;
         this.statut = statut;
+        this.sync_status = sync_status;;
 
     }
 
@@ -132,5 +147,13 @@ public class Tache {
                 ", responsable=" + responsable +
                 ", tache=" + ressource +
                 '}';
+    }
+
+    public String getSync_status() {
+        return sync_status;
+    }
+
+    public void setSync_status(String sync_status) {
+        this.sync_status = sync_status;
     }
 }

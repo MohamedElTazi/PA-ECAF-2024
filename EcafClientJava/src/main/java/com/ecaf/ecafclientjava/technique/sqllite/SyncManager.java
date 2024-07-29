@@ -1,6 +1,8 @@
 package com.ecaf.ecafclientjava.technique.sqllite;
 
 import com.ecaf.ecafclientjava.entites.*;
+import com.ecaf.ecafclientjava.technique.HttpResponseWrapper;
+import com.ecaf.ecafclientjava.technique.HttpService;
 import com.ecaf.ecafclientjava.technique.InstantTypeAdapter;
 import com.ecaf.ecafclientjava.technique.Urlapi;
 import com.google.gson.*;
@@ -11,11 +13,46 @@ import okhttp3.Response;
 import java.io.IOException;
 import java.sql.*;
 import java.time.Instant;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.List;
 
 public class SyncManager {
+    public class JsonUtil {
+        public static String prepareTacheRequestBody(Tache tache) {
+            DateTimeFormatter formatter = DateTimeFormatter.ISO_INSTANT;
 
+            String dateDebutStr = tache.getDateDebut() != null ? formatter.format(tache.getDateDebut()) : null;
+            String dateFinStr = tache.getDateFin() != null ? formatter.format(tache.getDateFin()) : null;
+
+            return String.format("{\"description\":\"%s\", \"dateDebut\":\"%s\", \"dateFin\":\"%s\", \"statut\":\"%s\", \"responsable\":%d, \"ressource\":%d, \"sync_status\":\"%s\"}",
+                    tache.getDescription(), dateDebutStr, dateFinStr, tache.getStatut(), tache.getResponsableId(), tache.getRessourceId(), tache.getSync_status());
+        }
+
+        public static String prepareTacheRequestBodyPatch(Tache tache) {
+            DateTimeFormatter formatter = DateTimeFormatter.ISO_INSTANT;
+
+            String dateDebutStr = tache.getDateDebut() != null ? formatter.format(tache.getDateDebut()) : null;
+            String dateFinStr = tache.getDateFin() != null ? formatter.format(tache.getDateFin()) : null;
+
+            return String.format("{\"id\":%d, \"description\":\"%s\", \"dateDebut\":\"%s\", \"dateFin\":\"%s\", \"statut\":\"%s\", \"responsable\":%d, \"ressource\":%d,  \"sync_status\":\"%s\"}",
+                    tache.getTacheID(), tache.getDescription(), dateDebutStr, dateFinStr, tache.getStatut(), tache.getResponsableId(), tache.getRessourceId(), tache.getSync_status());
+        }
+
+
+        public static String prepareRessourceRequestBody(Ressource ressource) {
+            return String.format("{\"nom\":\"%s\", \"type\":\"%s\", \"quantite\":%d, \"emplacement\":\"%s\", \"sync_status\":\"%s\"}",
+                    ressource.getNom(), ressource.getType(), ressource.getQuantite(), ressource.getEmplacement(), ressource.getSync_status());
+        }
+
+        public static String prepareRessourceRequestBodyPatch(Ressource ressource) {
+            return String.format("{\"id\":%d, \"nom\":\"%s\", \"type\":\"%s\", \"quantite\":%d, \"emplacement\":\"%s\", \"sync_status\":\"%s\"}",
+                    ressource.getRessourceID(), ressource.getNom(), ressource.getType(), ressource.getQuantite(), ressource.getEmplacement(), ressource.getSync_status());
+        }
+
+    }
+
+    private final HttpService httpService = new HttpService();
     private static final OkHttpClient client = new OkHttpClient();
 
     public void syncDisplayedTables() {
@@ -171,7 +208,63 @@ public class SyncManager {
 
 
 
-    public void syncData() {
-        // Implémentez la synchronisation des données pour ressource et tache
+    public void syncData() throws IOException, InterruptedException {
+        if (NetworkUtil.isOnline()) {
+            // Synchroniser les tâches
+            List<Tache> newTaches = SQLiteHelper.getTachesBySyncStatus(SyncStatus.NEW.getStatus());
+            for (Tache tache : newTaches) {
+                String requestBody = JsonUtil.prepareTacheRequestBody(tache);
+                HttpResponseWrapper responseWrapper = httpService.sendPostRequest("taches", requestBody);
+                if (responseWrapper.getStatusCode() == 201) {
+                    SQLiteHelper.updateTacheSyncStatus(tache.getTacheID(), SyncStatus.SYNCED.getStatus());
+                }
+            }
+
+            List<Tache> updatedTaches = SQLiteHelper.getTachesBySyncStatus(SyncStatus.UPDATED.getStatus());
+            for (Tache tache : updatedTaches) {
+                String requestBody = JsonUtil.prepareTacheRequestBody(tache);
+                HttpResponseWrapper responseWrapper = httpService.sendPatchRequest("taches/" + tache.getTacheID(), requestBody);
+                if (responseWrapper.getStatusCode() == 200) {
+                    SQLiteHelper.updateTacheSyncStatus(tache.getTacheID(), SyncStatus.SYNCED.getStatus());
+                }
+            }
+
+            List<Tache> deletedTaches = SQLiteHelper.getTachesBySyncStatus(SyncStatus.DELETED.getStatus());
+            for (Tache tache : deletedTaches) {
+                HttpResponseWrapper responseWrapper = httpService.sendDeleteRequest("taches/" + tache.getTacheID(), "");
+                if (responseWrapper.getStatusCode() == 200) {
+                    SQLiteHelper.deleteTachePermanently(tache.getTacheID());
+                }
+            }
+
+            // Synchroniser les ressources
+            List<Ressource> newRessources = SQLiteHelper.getRessourcesBySyncStatus(SyncStatus.NEW.getStatus());
+            for (Ressource ressource : newRessources) {
+                String requestBody = JsonUtil.prepareRessourceRequestBody(ressource);
+                HttpResponseWrapper responseWrapper = httpService.sendPostRequest("ressources", requestBody);
+                if (responseWrapper.getStatusCode() == 201) {
+                    SQLiteHelper.updateRessourceSyncStatus(ressource.getRessourceID(), SyncStatus.SYNCED.getStatus());
+                }
+            }
+            List<Ressource> updatedRessources = SQLiteHelper.getRessourcesBySyncStatus(SyncStatus.UPDATED.getStatus());
+            for (Ressource ressource : updatedRessources) {
+                String requestBody = JsonUtil.prepareRessourceRequestBody(ressource);
+                HttpResponseWrapper responseWrapper = httpService.sendPatchRequest("ressources/" + ressource.getRessourceID(), requestBody);
+                if (responseWrapper.getStatusCode() == 200) {
+                    SQLiteHelper.updateRessourceSyncStatus(ressource.getRessourceID(), SyncStatus.SYNCED.getStatus());
+                }
+            }
+
+             List<Ressource> deletedRessources = SQLiteHelper.getRessourcesBySyncStatusDelete(SyncStatus.DELETED.getStatus());
+            for (Ressource ressource : deletedRessources) {
+                HttpResponseWrapper responseWrapper = httpService.sendDeleteRequest("ressources/" + ressource.getRessourceID(), "");
+                if (responseWrapper.getStatusCode() == 200) {
+                    SQLiteHelper.deleteRessourcePermanently(ressource.getRessourceID());
+                }
+            }
+        }
     }
+
+
+
 }

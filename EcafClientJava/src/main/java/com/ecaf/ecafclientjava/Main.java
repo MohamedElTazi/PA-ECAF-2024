@@ -48,6 +48,8 @@ import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import static com.ecaf.ecafclientjava.technique.sqllite.SQLiteHelper.updateTables;
+
 public class Main extends Application {
 
     private final MenuItem itemConnecter = new MenuItem("Se connecter");
@@ -77,6 +79,7 @@ public class Main extends Application {
 
         root.setPadding(new javafx.geometry.Insets(10, 10, 10, 10));
         root.setId("rootPane");
+        updateTables();
 
         MenuBar barreMenus = new MenuBar();
 
@@ -201,13 +204,22 @@ public class Main extends Application {
 
         SQLiteHelper.createTables();
 
-        // Vérifiez la connexion et synchronisez les données si en ligne
         boolean isOnline = NetworkUtil.isOnline();
-        System.out.println("Network status at startup: " + isOnline);
 
         if (isOnline) {
+            System.out.println("Network is online. Synchronizing data...");
+            // Synchroniser les modifications locales en premier
+            try {
+                new SyncManager().syncData(); // Synchronisation pour ressource et tache
+            } catch (IOException | InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+            // Ensuite, synchroniser les données affichées
             new SyncManager().syncDisplayedTables();
+        } else {
+            System.out.println("Network is offline. Skipping synchronization.");
         }
+
 
         // Initialiser les listes de données avec gestion des exceptions pour le mode offline
         try {
@@ -224,22 +236,7 @@ public class Main extends Application {
         // Vérification périodique de la connexion
         System.out.println("Initializing Timeline for periodic network check...");
 
-        Timeline timeline = new Timeline(new KeyFrame(Duration.seconds(60), event -> {
-            System.out.println("Checking network status...");
-            boolean onlineStatus = NetworkUtil.isOnline();
-            System.out.println("Network status during periodic check: " + onlineStatus);
-
-            if (onlineStatus) {
-                System.out.println("Network is online. Synchronizing data...");
-                // Synchroniser les données
-                new SyncManager().syncDisplayedTables();
-                new SyncManager().syncData(); // Synchronisation pour ressource et tache
-            } else {
-                System.out.println("Network is offline. Skipping synchronization.");
-            }
-        }));
-        timeline.setCycleCount(Timeline.INDEFINITE);
-        timeline.play();
+        ;
 
         System.out.println("Timeline started.");
 
@@ -452,6 +449,8 @@ public class Main extends Application {
                             } else {
                                 System.out.println("Échec de la déconnexion du serveur.");
                             }
+                            new SyncManager().syncDisplayedTables();
+
                         } else {
                             System.out.println("Déconnexion hors ligne.");
                         }
@@ -536,6 +535,8 @@ public class Main extends Application {
                             } else {
                                 System.out.println("Échec de la déconnexion du serveur.");
                             }
+                            new SyncManager().syncDisplayedTables();
+
                         } else {
                             System.out.println("Déconnexion hors ligne.");
                         }

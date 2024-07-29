@@ -6,6 +6,7 @@ import com.ecaf.ecafclientjava.technique.HttpService;
 import com.ecaf.ecafclientjava.technique.sqllite.NetworkUtil;
 import com.ecaf.ecafclientjava.technique.Theme;
 import com.ecaf.ecafclientjava.technique.sqllite.SQLiteHelper;
+import com.ecaf.ecafclientjava.technique.sqllite.SyncStatus;
 import javafx.geometry.Insets;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
@@ -87,12 +88,12 @@ public class VueAjoutRessource extends BorderPane {
             return;
         }
 
-        Ressource nouvelleRessource = new Ressource(0, nom, type, quantite, emplacement);
+        Ressource nouvelleRessource = new Ressource(0, nom, type, quantite, emplacement, SyncStatus.NEW.getStatus());
 
         // Check network status
         if (NetworkUtil.isOnline()) {
             // Prepare JSON or any other format to send to backend
-            String requestBody = String.format("{\"nom\":\"%s\", \"type\":\"%s\", \"quantite\":%d, \"emplacement\":\"%s\"}", nom, type, quantite, emplacement);
+            String requestBody = String.format("{\"nom\":\"%s\", \"type\":\"%s\", \"quantite\":%d, \"sync_status\":\"%s\", \"emplacement\":\"%s\"}", nom, type, quantite, SyncStatus.SYNCED.getStatus(),emplacement);
 
             // Send request to backend
             try {
