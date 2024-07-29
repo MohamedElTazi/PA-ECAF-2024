@@ -19,6 +19,8 @@ public class AG {
         this.quorum = quorum;
     }
 
+
+
     public Integer getAgId() {
         return id;
     }

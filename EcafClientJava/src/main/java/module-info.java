@@ -9,6 +9,9 @@ module com.ecaf.ecafclientjava {
     requires com.fasterxml.jackson.databind;
     requires com.google.gson;
     requires com.calendarfx.view;
+    requires java.desktop;
+    requires okhttp3;
+    requires spring.security.crypto;
 
     exports com.ecaf.ecafclientjava.entites;
     opens com.ecaf.ecafclientjava.entites to com.fasterxml.jackson.databind, com.google.gson;

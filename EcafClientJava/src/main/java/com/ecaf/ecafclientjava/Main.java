@@ -10,8 +10,13 @@ import com.ecaf.ecafclientjava.plugins.kanban.KanbanPlugin;
 import com.ecaf.ecafclientjava.plugins.note.NotePlugin;
 import com.ecaf.ecafclientjava.plugins.theme.ThemePlugin;
 import com.ecaf.ecafclientjava.technique.*;
+import com.ecaf.ecafclientjava.technique.sqllite.NetworkUtil;
+import com.ecaf.ecafclientjava.technique.sqllite.SQLiteHelper;
+import com.ecaf.ecafclientjava.technique.sqllite.SyncManager;
 import com.ecaf.ecafclientjava.vue.*;
 import com.fasterxml.jackson.databind.JsonNode;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
@@ -26,12 +31,16 @@ import javafx.scene.text.Text;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
+import javafx.util.Duration;
 import javafx.util.Pair;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import javafx.scene.control.Alert.AlertType;
+import org.springframework.security.crypto.bcrypt.BCrypt;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+
 import java.time.Instant;
 import java.util.List;
 import java.util.Objects;
@@ -56,7 +65,7 @@ public class Main extends Application {
     private VueAjoutRessource vueAjoutRessource;
     private VueGestionTache vueGestionTache;
     private VuePlanificationTache vuePlanificationTache;
-    private static final String VERSION = "version_1.0.1";
+    private static final String VERSION = "version_1.0.0";
     private static final Logger LOGGER = Logger.getLogger(Main.class.getName());
 
     public Main() throws IOException, InterruptedException {
@@ -190,6 +199,51 @@ public class Main extends Application {
 
         applyCurrentTheme();
 
+        SQLiteHelper.createTables();
+
+        // Vérifiez la connexion et synchronisez les données si en ligne
+        boolean isOnline = NetworkUtil.isOnline();
+        System.out.println("Network status at startup: " + isOnline);
+
+        if (isOnline) {
+            new SyncManager().syncDisplayedTables();
+        }
+
+        // Initialiser les listes de données avec gestion des exceptions pour le mode offline
+        try {
+            evenements = httpService.getAllEvenement();
+            taches = httpService.getAllTaches();
+            ags = httpService.getAllAG();
+        } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
+            evenements = SQLiteHelper.getAllEvenement();
+            taches = SQLiteHelper.getAllTaches();
+            ags = SQLiteHelper.getAllAG();
+        }
+
+        // Vérification périodique de la connexion
+        System.out.println("Initializing Timeline for periodic network check...");
+
+        Timeline timeline = new Timeline(new KeyFrame(Duration.seconds(60), event -> {
+            System.out.println("Checking network status...");
+            boolean onlineStatus = NetworkUtil.isOnline();
+            System.out.println("Network status during periodic check: " + onlineStatus);
+
+            if (onlineStatus) {
+                System.out.println("Network is online. Synchronizing data...");
+                // Synchroniser les données
+                new SyncManager().syncDisplayedTables();
+                new SyncManager().syncData(); // Synchronisation pour ressource et tache
+            } else {
+                System.out.println("Network is offline. Skipping synchronization.");
+            }
+        }));
+        timeline.setCycleCount(Timeline.INDEFINITE);
+        timeline.play();
+
+        System.out.println("Timeline started.");
+
+
         itemModeClair.setOnAction(event -> {
             Theme.applyTheme("clair", scene);
             applyCurrentTheme();
@@ -244,37 +298,80 @@ public class Main extends Application {
                 Pair<String, String> result = reponse.get();
                 if (!result.getKey().isEmpty() && !result.getValue().isEmpty()) {
                     try {
-                        String username = "alice.martin@email.com";//result.getKey();//"alice.martin@email.com";
-                        String password = "motdepasse2";//result.getValue();//"motdepasse2";
+                        String username = result.getKey();
+                        String password = result.getValue();
                         String requestBody = "{\"email\":\"" + username + "\", \"motDePasse\":\"" + password + "\"}";
 
-                        HttpResponseWrapper responseWrapper = httpService.sendPostRequest("auth/login", requestBody);
-                        jsonResponse = responseWrapper.getBody();
-                        statusCode = responseWrapper.getStatusCode();
+                        if (NetworkUtil.isOnline()) {
+                            // Connexion en ligne
+                            HttpResponseWrapper responseWrapper = httpService.sendPostRequest("auth/login", requestBody);
+                            jsonResponse = responseWrapper.getBody();
+                            statusCode = responseWrapper.getStatusCode();
 
-                        if (statusCode == 200) {
-                            JsonNode userNode = jsonResponse.get("user");
-                            User admin = new User(Integer.parseInt(userNode.get("id").asText()), userNode.get("nom").asText(), userNode.get("prenom").asText(), userNode.get("email").asText(), userNode.get("motDePasse").asText(), userNode.get("role").asText(), Instant.parse(userNode.get("dateInscription").asText()), userNode.get("estBenevole").asBoolean(), jsonResponse.get("token").asText(), false);
-                            if(!Objects.equals(admin.getRole(), "Administrateur")){
+                            if (statusCode == 200) {
+                                JsonNode userNode = jsonResponse.get("user");
+                                User admin = new User(
+                                        Integer.parseInt(userNode.get("id").asText()),
+                                        userNode.get("nom").asText(),
+                                        userNode.get("prenom").asText(),
+                                        userNode.get("email").asText(),
+                                        userNode.get("motDePasse").asText(),
+                                        userNode.get("role").asText(),
+                                        Instant.parse(userNode.get("dateInscription").asText()),
+                                        userNode.get("estBenevole").asBoolean(),
+                                        jsonResponse.get("token").asText(),
+                                        false
+                                );
+                                if (!Objects.equals(admin.getRole(), "Administrateur")) {
+                                    VueConnexionEchoue vueEchoue = new VueConnexionEchoue();
+                                    vueEchoue.showAndWait();
+                                    return;
+                                }
+                                // Enregistrer l'utilisateur dans SQLite pour une utilisation hors ligne
+                                SQLiteHelper.saveUser(admin);
+
+                                Session.ouvrir(admin);
+                                itemConnecter.setDisable(true);
+                                itemDeconnecter.setDisable(false);
+                                menuRessource.setDisable(false);
+                                menuTache.setDisable(false);
+                                menuPrincipal.setDisable(false);
+
+                                vueMenuPrincipal = new VueMenuPrincipal();
+                                root.setCenter(vueMenuPrincipal);
+                            } else {
                                 VueConnexionEchoue vueEchoue = new VueConnexionEchoue();
                                 vueEchoue.showAndWait();
-                                return;
                             }
-                            Session.ouvrir(admin);
-                            itemConnecter.setDisable(true);
-                            itemDeconnecter.setDisable(false);
-                            menuRessource.setDisable(false);
-                            menuTache.setDisable(false);
-                            menuPrincipal.setDisable(false);
-
-                            vueMenuPrincipal = new VueMenuPrincipal();
-                            root.setCenter(vueMenuPrincipal);
                         } else {
-                            VueConnexionEchoue vueEchoue = new VueConnexionEchoue();
-                            vueEchoue.showAndWait();
+                            // Connexion hors ligne
+                            User user = SQLiteHelper.getUserByEmail(username);
+                            String salt = "$2b$10$F4zka3au8kLQG1rAD2Oq5e";
+                            String hashedPassword = BCrypt.hashpw(password, salt);
+                            if (user != null && user.getMotDePasse().equals(hashedPassword)) {
+                                if (!Objects.equals(user.getRole(), "Administrateur")) {
+                                    VueConnexionEchoue vueEchoue = new VueConnexionEchoue();
+                                    vueEchoue.showAndWait();
+                                    return;
+                                }
+                                Session.ouvrir(user);
+                                itemConnecter.setDisable(true);
+                                itemDeconnecter.setDisable(false);
+                                menuRessource.setDisable(false);
+                                menuTache.setDisable(false);
+                                menuPrincipal.setDisable(false);
+
+                                vueMenuPrincipal = new VueMenuPrincipal();
+                                root.setCenter(vueMenuPrincipal);
+                            } else {
+                                VueConnexionEchoue vueEchoue = new VueConnexionEchoue();
+                                vueEchoue.showAndWait();
+                            }
                         }
                     } catch (Exception e) {
                         e.printStackTrace();
+                        VueConnexionEchoue vueEchoue = new VueConnexionEchoue();
+                        vueEchoue.showAndWait();
                     }
                 } else {
                     VueConnexionVide vueVide = new VueConnexionVide();
@@ -286,21 +383,33 @@ public class Main extends Application {
         itemDeconnecter.setOnAction(event -> {
             try {
                 User userCourant = Session.getSession().getLeVisiteur();
-                String requestBody = "{\"token\":\"" + userCourant.getToken() + "\"}";
-                HttpResponseWrapper responseWrapper = httpService.sendDeleteRequest("auth/logout/" + userCourant.getId(), requestBody);
-                jsonResponse = responseWrapper.getBody();
-                statusCode = responseWrapper.getStatusCode();
 
-                if (statusCode == 201) {
-                    Session.fermer();
-                    itemConnecter.setDisable(false);
-                    itemDeconnecter.setDisable(true);
-                    menuRessource.setDisable(true);
-                    menuTache.setDisable(true);
-                    menuPrincipal.setDisable(true);
+                if (NetworkUtil.isOnline()) {
+                    // Déconnexion en ligne
+                    String requestBody = "{\"token\":\"" + userCourant.getToken() + "\"}";
+                    HttpResponseWrapper responseWrapper = httpService.sendDeleteRequest("auth/logout/" + userCourant.getId(), requestBody);
+                    jsonResponse = responseWrapper.getBody();
+                    statusCode = responseWrapper.getStatusCode();
 
-                    root.setCenter(new Text("Vous êtes déconnecté"));
+                    if (statusCode == 201) {
+                        System.out.println("Déconnexion réussie du serveur.");
+                    } else {
+                        System.out.println("Échec de la déconnexion du serveur.");
+                    }
+                } else {
+                    System.out.println("Déconnexion hors ligne.");
                 }
+
+                // Fermer la session localement dans les deux cas (en ligne et hors ligne)
+                Session.fermer();
+                itemConnecter.setDisable(false);
+                itemDeconnecter.setDisable(true);
+                menuRessource.setDisable(true);
+                menuTache.setDisable(true);
+                menuPrincipal.setDisable(true);
+
+                root.setCenter(new Text("Vous êtes déconnecté"));
+
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -327,20 +436,33 @@ public class Main extends Application {
             if (reponse.isPresent() && reponse.get() == btnOui) {
                 if (Session.getSession() == null) {
                     Platform.exit();
-                }
-                try {
-                    User userCourant = Session.getSession().getLeVisiteur();
-                    String requestBody = "{\"token\":\"" + userCourant.getToken() + "\"}";
-                    HttpResponseWrapper responseWrapper = httpService.sendDeleteRequest("auth/logout/" + userCourant.getId(), requestBody);
-                    jsonResponse = responseWrapper.getBody();
-                    statusCode = responseWrapper.getStatusCode();
+                } else {
+                    try {
+                        User userCourant = Session.getSession().getLeVisiteur();
 
-                    if (statusCode == 201) {
+                        if (NetworkUtil.isOnline()) {
+                            // Déconnexion en ligne
+                            String requestBody = "{\"token\":\"" + userCourant.getToken() + "\"}";
+                            HttpResponseWrapper responseWrapper = httpService.sendDeleteRequest("auth/logout/" + userCourant.getId(), requestBody);
+                            jsonResponse = responseWrapper.getBody();
+                            statusCode = responseWrapper.getStatusCode();
+
+                            if (statusCode == 201) {
+                                System.out.println("Déconnexion réussie du serveur.");
+                            } else {
+                                System.out.println("Échec de la déconnexion du serveur.");
+                            }
+                        } else {
+                            System.out.println("Déconnexion hors ligne.");
+                        }
+
+                        // Fermer la session localement dans les deux cas (en ligne et hors ligne)
                         Session.fermer();
                         Platform.exit();
+
+                    } catch (Exception e) {
+                        e.printStackTrace();
                     }
-                } catch (Exception e) {
-                    e.printStackTrace();
                 }
             } else {
                 alertQuitter.close();
@@ -392,30 +514,45 @@ public class Main extends Application {
             DialogPane dialogPane = alertQuitter.getDialogPane();
             dialogPane.getStylesheets().add(getClass().getResource(Theme.themeAlert).toExternalForm());
             dialogPane.getStyleClass().add("alert");
+
             Optional<ButtonType> reponse = alertQuitter.showAndWait();
 
             if (reponse.isPresent() && reponse.get() == btnOui) {
                 if (Session.getSession() == null) {
                     Platform.exit();
-                }
-                try {
-                    User userCourant = Session.getSession().getLeVisiteur();
-                    String requestBody = "{\"token\":\"" + userCourant.getToken() + "\"}";
-                    HttpResponseWrapper responseWrapper = httpService.sendDeleteRequest("auth/logout/" + userCourant.getId(), requestBody);
-                    jsonResponse = responseWrapper.getBody();
-                    statusCode = responseWrapper.getStatusCode();
+                } else {
+                    try {
+                        User userCourant = Session.getSession().getLeVisiteur();
 
-                    if (statusCode == 201) {
+                        if (NetworkUtil.isOnline()) {
+                            // Déconnexion en ligne
+                            String requestBody = "{\"token\":\"" + userCourant.getToken() + "\"}";
+                            HttpResponseWrapper responseWrapper = httpService.sendDeleteRequest("auth/logout/" + userCourant.getId(), requestBody);
+                            jsonResponse = responseWrapper.getBody();
+                            statusCode = responseWrapper.getStatusCode();
+
+                            if (statusCode == 201) {
+                                System.out.println("Déconnexion réussie du serveur.");
+                            } else {
+                                System.out.println("Échec de la déconnexion du serveur.");
+                            }
+                        } else {
+                            System.out.println("Déconnexion hors ligne.");
+                        }
+
+                        // Fermer la session localement dans les deux cas (en ligne et hors ligne)
                         Session.fermer();
                         Platform.exit();
+
+                    } catch (Exception e) {
+                        e.printStackTrace();
                     }
-                } catch (Exception e) {
-                    e.printStackTrace();
                 }
             } else {
                 alertQuitter.close();
             }
         });
+
     }
 
     private CalculatorPlugin loadCalculatorPlugin() {

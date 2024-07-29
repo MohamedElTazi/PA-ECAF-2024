@@ -15,7 +15,8 @@ public class KanbanPluginImpl implements KanbanPlugin {
     @Override
     public Pane getUI() {
         HBox kanbanBoard = new HBox(10);
-        kanbanBoard.setPadding(new Insets(10));
+        kanbanBoard.setPadding(new Insets(20));
+        kanbanBoard.setStyle("-fx-background-color: #e9ecef;");
 
         toDoColumn = createColumn("À faire");
         inProgressColumn = createColumn("En cours");
@@ -29,16 +30,20 @@ public class KanbanPluginImpl implements KanbanPlugin {
     private VBox createColumn(String title) {
         VBox column = new VBox(10);
         column.setPadding(new Insets(10));
-        column.setStyle("-fx-background-color: #f4f4f4; -fx-border-color: #cccccc; -fx-border-width: 1px;");
+        column.setStyle("-fx-background-color: #ffffff; -fx-border-color: #cccccc; -fx-border-width: 1px; -fx-border-radius: 5px; -fx-background-radius: 5px;");
 
         TextField titleField = new TextField(title);
         titleField.setEditable(false);
-        titleField.setStyle("-fx-font-weight: bold; -fx-background-color: transparent; -fx-border-color: transparent;");
+        titleField.setStyle("-fx-font-weight: bold; -fx-background-color: transparent; -fx-border-color: transparent; -fx-font-size: 16px;");
 
         TextField newTaskField = new TextField();
         newTaskField.setPromptText("Nouvelle tâche");
+        newTaskField.setStyle("-fx-background-color: #f8f9fa; -fx-border-color: #ced4da; -fx-border-radius: 5px; -fx-background-radius: 5px;");
 
         Button addButton = new Button("Ajouter");
+        addButton.setStyle("-fx-background-color: #007bff; -fx-text-fill: white; -fx-border-radius: 5px; -fx-background-radius: 5px;");
+        addButton.setOnMouseEntered(e -> addButton.setStyle("-fx-background-color: #0056b3; -fx-text-fill: white; -fx-border-radius: 5px; -fx-background-radius: 5px;"));
+        addButton.setOnMouseExited(e -> addButton.setStyle("-fx-background-color: #007bff; -fx-text-fill: white; -fx-border-radius: 5px; -fx-background-radius: 5px;"));
         addButton.setOnAction(e -> addTask(column, newTaskField));
 
         column.getChildren().addAll(titleField, newTaskField, addButton);
@@ -54,15 +59,22 @@ public class KanbanPluginImpl implements KanbanPlugin {
 
         HBox taskBox = new HBox(10);
         taskBox.setPadding(new Insets(5));
-        taskBox.setStyle("-fx-background-color: #ffffff; -fx-border-color: #cccccc; -fx-border-width: 1px;");
+        taskBox.setStyle("-fx-background-color: #ffffff; -fx-border-color: #cccccc; -fx-border-width: 1px; -fx-border-radius: 5px; -fx-background-radius: 5px;");
 
         TextField taskField = new TextField(taskText);
         taskField.setEditable(false);
+        taskField.setStyle("-fx-background-color: transparent; -fx-border-color: transparent;");
 
         Button moveRightButton = new Button(">");
+        moveRightButton.setStyle("-fx-background-color: #17a2b8; -fx-text-fill: white; -fx-border-radius: 5px; -fx-background-radius: 5px;");
+        moveRightButton.setOnMouseEntered(e -> moveRightButton.setStyle("-fx-background-color: #117a8b; -fx-text-fill: white; -fx-border-radius: 5px; -fx-background-radius: 5px;"));
+        moveRightButton.setOnMouseExited(e -> moveRightButton.setStyle("-fx-background-color: #17a2b8; -fx-text-fill: white; -fx-border-radius: 5px; -fx-background-radius: 5px;"));
         moveRightButton.setOnAction(e -> moveTaskRight(taskBox));
 
         Button moveLeftButton = new Button("<");
+        moveLeftButton.setStyle("-fx-background-color: #17a2b8; -fx-text-fill: white; -fx-border-radius: 5px; -fx-background-radius: 5px;");
+        moveLeftButton.setOnMouseEntered(e -> moveLeftButton.setStyle("-fx-background-color: #117a8b; -fx-text-fill: white; -fx-border-radius: 5px; -fx-background-radius: 5px;"));
+        moveLeftButton.setOnMouseExited(e -> moveLeftButton.setStyle("-fx-background-color: #17a2b8; -fx-text-fill: white; -fx-border-radius: 5px; -fx-background-radius: 5px;"));
         moveLeftButton.setOnAction(e -> moveTaskLeft(taskBox));
 
         taskBox.getChildren().addAll(moveLeftButton, taskField, moveRightButton);

@@ -1,6 +1,7 @@
 package com.ecaf.ecafclientjava.plugins;
 
 import com.ecaf.ecafclientjava.plugins.calculatrice.CalculatorPlugin;
+import javafx.geometry.Insets;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
@@ -18,9 +19,11 @@ public class CalculatorPluginImpl implements CalculatorPlugin {
         GridPane pane = new GridPane();
         pane.setHgap(10);
         pane.setVgap(10);
+        pane.setPadding(new Insets(20, 20, 20, 20));
 
         display.setEditable(false);
         display.setPrefHeight(50);
+        display.setStyle("-fx-font-size: 20px; -fx-background-color: #f0f0f0; -fx-border-color: #dcdcdc; -fx-padding: 10px;");
         pane.add(display, 0, 0, 4, 1);
 
         String[] buttonLabels = {
@@ -35,6 +38,9 @@ public class CalculatorPluginImpl implements CalculatorPlugin {
         for (String label : buttonLabels) {
             Button button = new Button(label);
             button.setPrefSize(50, 50);
+            button.setStyle("-fx-font-size: 18px; -fx-background-color: #e0e0e0; -fx-border-color: #c0c0c0; -fx-text-fill: #333;");
+            button.setOnMouseEntered(e -> button.setStyle("-fx-font-size: 18px; -fx-background-color: #d0d0d0; -fx-border-color: #c0c0c0; -fx-text-fill: #000;"));
+            button.setOnMouseExited(e -> button.setStyle("-fx-font-size: 18px; -fx-background-color: #e0e0e0; -fx-border-color: #c0c0c0; -fx-text-fill: #333;"));
             button.setOnAction(e -> handleButtonClick(label));
             pane.add(button, col, row);
             col++;

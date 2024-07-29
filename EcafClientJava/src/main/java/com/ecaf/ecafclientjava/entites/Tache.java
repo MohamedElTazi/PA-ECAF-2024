@@ -14,8 +14,11 @@ public class Tache {
     private User responsable;
     private Ressource ressource;
 
+    private int responsableId;
+    private int ressourceId;
+
     // Constructeur
-    public Tache(int tacheID, String description, Instant dateDebut, Instant dateFin, String statut, User responsable,Tache Ressource) {
+    public Tache(int tacheID, String description, Instant dateDebut, Instant dateFin, String statut, User responsable,Ressource ressource) {
         this.id = tacheID;
         this.description = description;
         this.dateDebut = dateDebut;
@@ -23,6 +26,41 @@ public class Tache {
         this.statut = statut;
         this.responsable = responsable;
         this.ressource = ressource;
+    }
+
+    public Tache(int id, String description, Instant dateDebut, Instant dateFin, String statut, int responsableId, int ressourceId) {
+        this.id = id;
+        this.description = description;
+        this.dateDebut = dateDebut;
+        this.dateFin = dateFin;
+        this.statut = statut;
+        this.responsableId = responsableId;
+        this.ressourceId = ressourceId;
+    }
+
+    public int getResponsableId() {
+        return responsableId;
+    }
+
+    public void setResponsableId(int responsableId) {
+        this.responsableId = responsableId;
+    }
+
+    public int getRessourceId() {
+        return ressourceId;
+    }
+
+    public void setRessourceId(int ressourceId) {
+        this.ressourceId = ressourceId;
+    }
+
+    public Tache(int id, String description, Instant dateDebut, Instant dateFin, String statut) {
+        this.id = id;
+        this.description = description;
+        this.dateDebut = dateDebut;
+        this.dateFin = dateFin;
+        this.statut = statut;
+
     }
 
     // Getters et setters

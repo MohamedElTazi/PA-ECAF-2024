@@ -1,18 +1,17 @@
 package com.ecaf.ecafclientjava.vue;
 
 import com.ecaf.ecafclientjava.entites.Ressource;
-import com.ecaf.ecafclientjava.entites.Tache;
-import com.ecaf.ecafclientjava.entites.User;
 import com.ecaf.ecafclientjava.technique.HttpResponseWrapper;
 import com.ecaf.ecafclientjava.technique.HttpService;
+import com.ecaf.ecafclientjava.technique.sqllite.NetworkUtil;
 import com.ecaf.ecafclientjava.technique.Theme;
+import com.ecaf.ecafclientjava.technique.sqllite.SQLiteHelper;
 import com.fasterxml.jackson.databind.JsonNode;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.scene.control.*;
-import javafx.scene.control.cell.ComboBoxTableCell;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.layout.BorderPane;
@@ -22,10 +21,6 @@ import javafx.util.Callback;
 import javafx.util.StringConverter;
 
 import java.io.IOException;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 public class VueGestionRessource extends BorderPane {
@@ -154,7 +149,12 @@ public class VueGestionRessource extends BorderPane {
 
     private void fetchAndPopulateRessourceData() {
         try {
-            List<Ressource> ressources = httpService.getAllRessources(); // Assurez-vous que cette méthode existe dans votre HttpService
+            List<Ressource> ressources;
+            if (NetworkUtil.isOnline()) {
+                ressources = httpService.getAllRessources();
+            } else {
+                ressources = SQLiteHelper.getAllRessources();
+            }
 
             ObservableList<Ressource> ressourceData = FXCollections.observableList(ressources);
 
@@ -165,31 +165,43 @@ public class VueGestionRessource extends BorderPane {
     }
 
     private void handleEditRessource(Ressource ressource) {
-        try {
-            String requestBody = "{"
-                    + "\"nom\":\"" + ressource.getNom() + "\","
-                    + "\"type\":\"" + ressource.getType() + "\","
-                    + "\"quantite\":" + ressource.getQuantite() + ","
-                    + "\"emplacement\":\"" + ressource.getEmplacement() + "\""
-                    + "}";
+        if (NetworkUtil.isOnline()) {
+            try {
+                String requestBody = "{"
+                        + "\"nom\":\"" + ressource.getNom() + "\","
+                        + "\"type\":\"" + ressource.getType() + "\","
+                        + "\"quantite\":" + ressource.getQuantite() + ","
+                        + "\"emplacement\":\"" + ressource.getEmplacement() + "\""
+                        + "}";
 
-            HttpResponseWrapper responseWrapper = httpService.sendPatchRequest("ressources/" + ressource.getRessourceID(), requestBody);
-            jsonResponse = responseWrapper.getBody();
-            statusCode = responseWrapper.getStatusCode();
+                HttpResponseWrapper responseWrapper = httpService.sendPatchRequest("ressources/" + ressource.getRessourceID(), requestBody);
+                jsonResponse = responseWrapper.getBody();
+                statusCode = responseWrapper.getStatusCode();
+                fetchAndPopulateRessourceData();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        } else {
+            // Update local SQLite database
+            SQLiteHelper.updateRessource(ressource);
             fetchAndPopulateRessourceData();
-        } catch (Exception e) {
-            e.printStackTrace();
         }
     }
 
     private void handleDeleteRessource(Ressource ressource) {
-        try {
-            HttpResponseWrapper responseWrapper = httpService.sendDeleteRequest("ressources/" + ressource.getRessourceID(),"");
-            jsonResponse = responseWrapper.getBody();
-            statusCode = responseWrapper.getStatusCode();
+        if (NetworkUtil.isOnline()) {
+            try {
+                HttpResponseWrapper responseWrapper = httpService.sendDeleteRequest("ressources/" + ressource.getRessourceID(), "");
+                jsonResponse = responseWrapper.getBody();
+                statusCode = responseWrapper.getStatusCode();
+                fetchAndPopulateRessourceData();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        } else {
+            // Delete from local SQLite database
+            SQLiteHelper.deleteRessource(ressource.getRessourceID());
             fetchAndPopulateRessourceData();
-        } catch (Exception e) {
-            e.printStackTrace();
         }
     }
 

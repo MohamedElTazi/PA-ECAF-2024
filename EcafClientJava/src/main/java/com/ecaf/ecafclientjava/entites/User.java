@@ -36,6 +36,18 @@ public class User {
         this.estEnLigne = estEnLigne;
     }
 
+    public User(int id, String nom, String prenom, String email, String motDePasse, String role, Instant dateInscription, boolean estBenevole, boolean estEnLigne) {
+        this.id = id;
+        this.nom = nom;
+        this.prenom = prenom;
+        this.email = email;
+        this.motDePasse = motDePasse;
+        this.role = role;
+        this.dateInscription = dateInscription;
+        this.estBenevole = estBenevole;
+        this.estEnLigne = estEnLigne;
+    }
+
     // Getters et setters
     public int getId() {
         return id;

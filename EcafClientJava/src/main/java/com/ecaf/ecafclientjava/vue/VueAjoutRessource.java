@@ -1,13 +1,14 @@
 package com.ecaf.ecafclientjava.vue;
 
+import com.ecaf.ecafclientjava.entites.Ressource;
 import com.ecaf.ecafclientjava.technique.HttpResponseWrapper;
 import com.ecaf.ecafclientjava.technique.HttpService;
+import com.ecaf.ecafclientjava.technique.sqllite.NetworkUtil;
 import com.ecaf.ecafclientjava.technique.Theme;
+import com.ecaf.ecafclientjava.technique.sqllite.SQLiteHelper;
 import javafx.geometry.Insets;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
-
-
 
 public class VueAjoutRessource extends BorderPane {
 
@@ -86,22 +87,32 @@ public class VueAjoutRessource extends BorderPane {
             return;
         }
 
-        // Prepare JSON or any other format to send to backend
-        String requestBody = String.format("{\"nom\":\"%s\", \"type\":\"%s\", \"quantite\":%d, \"emplacement\":\"%s\"}", nom, type, quantite, emplacement);
+        Ressource nouvelleRessource = new Ressource(0, nom, type, quantite, emplacement);
 
-        // Send request to backend
-        try {
-            HttpService httpService = new HttpService();
-            HttpResponseWrapper responseWrapper = httpService.sendPostRequest("ressources", requestBody);
-            if (responseWrapper.getStatusCode() == 201) {
-                showAlert(Alert.AlertType.INFORMATION, "Succès", "Ressource créé avec succès !");
-                handleReset();
-            } else {
-                showAlert(Alert.AlertType.ERROR, "Erreur", "\n" + "Échec de l'ajout d'une ressource.");
+        // Check network status
+        if (NetworkUtil.isOnline()) {
+            // Prepare JSON or any other format to send to backend
+            String requestBody = String.format("{\"nom\":\"%s\", \"type\":\"%s\", \"quantite\":%d, \"emplacement\":\"%s\"}", nom, type, quantite, emplacement);
+
+            // Send request to backend
+            try {
+                HttpService httpService = new HttpService();
+                HttpResponseWrapper responseWrapper = httpService.sendPostRequest("ressources", requestBody);
+                if (responseWrapper.getStatusCode() == 201) {
+                    showAlert(Alert.AlertType.INFORMATION, "Succès", "Ressource créée avec succès !");
+                    handleReset();
+                } else {
+                    showAlert(Alert.AlertType.ERROR, "Erreur", "Échec de l'ajout d'une ressource.");
+                }
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                showAlert(Alert.AlertType.ERROR, "Erreur", "Une erreur est survenue !");
             }
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            showAlert(Alert.AlertType.ERROR, "Erreur", "Une erreur est survenue !");
+        } else {
+            // Save to local SQLite database
+            SQLiteHelper.createRessource(nouvelleRessource);
+            showAlert(Alert.AlertType.INFORMATION, "Succès", "Ressource créée localement avec succès !");
+            handleReset();
         }
     }
 

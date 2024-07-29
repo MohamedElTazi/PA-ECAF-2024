@@ -1,28 +1,29 @@
 package com.ecaf.ecafclientjava.vue;
 
 import com.ecaf.ecafclientjava.entites.Ressource;
+import com.ecaf.ecafclientjava.entites.Tache;
 import com.ecaf.ecafclientjava.entites.User;
 import com.ecaf.ecafclientjava.technique.HttpResponseWrapper;
 import com.ecaf.ecafclientjava.technique.HttpService;
+import com.ecaf.ecafclientjava.technique.sqllite.NetworkUtil;
 import com.ecaf.ecafclientjava.technique.Theme;
+import com.ecaf.ecafclientjava.technique.sqllite.SQLiteHelper;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.Pane;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
 
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
-
-import javafx.scene.layout.*;
+import java.util.Random;
 
 public class VuePlanificationTache extends Pane {
 
@@ -273,16 +274,25 @@ public class VuePlanificationTache extends Pane {
         String requestBody = String.format("{\"description\":\"%s\", \"dateDebut\":\"%s\", \"dateFin\":\"%s\", \"statut\":\"%s\", \"responsable\":%d, \"ressource\":%d}",
                 description, dateDebutStr, dateFinStr, statut, responsableId, ressourceId);
 
-        // Send request to backend
         try {
-            HttpService httpService = new HttpService();
-            HttpResponseWrapper responseWrapper = httpService.sendPostRequest("taches", requestBody);
-            System.out.println(responseWrapper.getBody());
-            if (Objects.equals(responseWrapper.getStatusCode(), 201)) {
-                showAlert(Alert.AlertType.INFORMATION, "Success", "Tache créé avec succès !");
-                handleReset();
+            if (NetworkUtil.isOnline()) {
+                // Send request to backend if online
+                HttpService httpService = new HttpService();
+                HttpResponseWrapper responseWrapper = httpService.sendPostRequest("taches", requestBody);
+                System.out.println(responseWrapper.getBody());
+                if (Objects.equals(responseWrapper.getStatusCode(), 201)) {
+                    showAlert(Alert.AlertType.INFORMATION, "Success", "Tache créé avec succès !");
+                    handleReset();
+                } else {
+                    showAlert(Alert.AlertType.ERROR, "Error", "\n" + "Échec de l'ajout d'une tache.");
+                }
             } else {
-                showAlert(Alert.AlertType.ERROR, "Error", "\n" + "Échec de l'ajout d'une tache.");
+                Random random = new Random();
+                int randomNumber = random.nextInt(1000);
+                Tache tache = new Tache(randomNumber, description, dateDebutTime.toInstant(ZoneOffset.UTC), dateFinTime.toInstant(ZoneOffset.UTC), statut, responsableId, ressourceId);
+                SQLiteHelper.createTache(tache);
+                showAlert(Alert.AlertType.INFORMATION, "Success", "Tache enregistré localement !");
+                handleReset();
             }
         } catch (Exception ex) {
             ex.printStackTrace();

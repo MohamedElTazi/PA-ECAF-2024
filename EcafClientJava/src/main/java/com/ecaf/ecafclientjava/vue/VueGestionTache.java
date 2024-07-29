@@ -5,7 +5,9 @@ import com.ecaf.ecafclientjava.entites.Tache;
 import com.ecaf.ecafclientjava.entites.User;
 import com.ecaf.ecafclientjava.technique.HttpResponseWrapper;
 import com.ecaf.ecafclientjava.technique.HttpService;
+import com.ecaf.ecafclientjava.technique.sqllite.NetworkUtil;
 import com.ecaf.ecafclientjava.technique.Theme;
+import com.ecaf.ecafclientjava.technique.sqllite.SQLiteHelper;
 import com.fasterxml.jackson.databind.JsonNode;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
@@ -232,7 +234,7 @@ public class VueGestionTache extends BorderPane {
 
     private void fetchAndPopulateTacheData() {
         try {
-            List<Tache> taches = httpService.getAllTaches(); // Assurez-vous que cette méthode existe dans votre HttpService
+            List<Tache> taches = httpService.getAllTaches();
 
             ObservableList<Tache> tacheData = FXCollections.observableList(taches);
 
@@ -273,7 +275,6 @@ public class VueGestionTache extends BorderPane {
         try {
             DateTimeFormatter formatter = DateTimeFormatter.ISO_INSTANT;
             String requestBody = "{"
-
                     + "\"description\":\"" + tache.getDescription() + "\","
                     + "\"dateDebut\":\"" + formatter.format(tache.getDateDebut()) + "\","
                     + "\"dateFin\":\"" + formatter.format(tache.getDateFin()) + "\","
@@ -282,9 +283,13 @@ public class VueGestionTache extends BorderPane {
                     + "\"ressource\":" + tache.getRessource().getRessourceID()
                     + "}";
 
-            HttpResponseWrapper responseWrapper = httpService.sendPatchRequest("taches/" + tache.getTacheID(), requestBody);
-            jsonResponse = responseWrapper.getBody();
-            statusCode = responseWrapper.getStatusCode();
+            if (NetworkUtil.isOnline()) {
+                HttpResponseWrapper responseWrapper = httpService.sendPatchRequest("taches/" + tache.getTacheID(), requestBody);
+                jsonResponse = responseWrapper.getBody();
+                statusCode = responseWrapper.getStatusCode();
+            } else {
+                SQLiteHelper.updateTache(tache);
+            }
             fetchAndPopulateTacheData();
         } catch (Exception e) {
             e.printStackTrace();
@@ -293,9 +298,13 @@ public class VueGestionTache extends BorderPane {
 
     private void handleDeleteTache(Tache tache) {
         try {
-            HttpResponseWrapper responseWrapper = httpService.sendDeleteRequest("taches/" + tache.getTacheID(),"");
-            jsonResponse = responseWrapper.getBody();
-            statusCode = responseWrapper.getStatusCode();
+            if (NetworkUtil.isOnline()) {
+                HttpResponseWrapper responseWrapper = httpService.sendDeleteRequest("taches/" + tache.getTacheID(), "");
+                jsonResponse = responseWrapper.getBody();
+                statusCode = responseWrapper.getStatusCode();
+            } else {
+                SQLiteHelper.deleteTache(tache.getTacheID());
+            }
             fetchAndPopulateTacheData();
         } catch (Exception e) {
             e.printStackTrace();
@@ -362,6 +371,7 @@ public class VueGestionTache extends BorderPane {
             }
         }
     }
+    
 
     public void applyCurrentTheme() {
         this.getStylesheets().clear();
